@@ -171,6 +171,8 @@ public class EntityIndex implements Serializable {
         int[] blocks1 = entityBlocks[comparison.getEntityId1()];
         int[] blocks2 = entityBlocks[comparison.getEntityId2() + datasetLimit];
 
+//        if(blocks1.length==0 || blocks2.length==0) System.err.println(blocks1.length+"    "+blocks2.length);
+
         boolean firstCommonIndex = false;
         int commonBlocks = 0;
         int noOfBlocks1 = blocks1.length;

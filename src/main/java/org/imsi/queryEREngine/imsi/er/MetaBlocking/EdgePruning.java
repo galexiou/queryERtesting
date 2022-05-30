@@ -9,6 +9,7 @@ import org.imsi.queryEREngine.imsi.er.Utilities.MetaBlockingConfiguration.Weight
 import org.imsi.queryEREngine.imsi.er.Utilities.QueryComparisonIterator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public class EdgePruning extends AbstractMetablocking {
 
     protected double averageWeight;
     protected Set<Integer> qIds;
+    protected int ucomps=0;
 
     public EdgePruning(WeightingScheme scheme) {
         super("Edge Pruning", scheme);
@@ -42,20 +44,31 @@ public class EdgePruning extends AbstractMetablocking {
     protected void filterComparisons(List<AbstractBlock> blocks) {
         boolean cleanCleanER = blocks.get(0) instanceof BilateralBlock;
         final List<AbstractBlock> newBlocks = new ArrayList<AbstractBlock>();
+//        int biggest = (int) blocks.get(blocks.size()/2).getNoOfComparisons()/3;
         for (AbstractBlock block : blocks) {
             final List<Integer> entities1 = new ArrayList<Integer>();
             final List<Integer> entities2 = new ArrayList<Integer>();
-
+//            HashSet<Comparison> uComp = new HashSet<Comparison>(biggest,0.8f);
+            HashSet<Comparison> uComp = new HashSet<>();
             //ComparisonIterator iterator = block.getComparisonIterator();
             QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
+//            ComparisonIterator iterator = block.getComparisonIterator();
 
             // if(!iterator.hasComparisons()) continue;
             while (iterator.hasNext()) {
                 Comparison comparison = iterator.next();
+
+                if (comparison.getEntityId1() == comparison.getEntityId2()) continue;
+                if (comparison.getEntityId1() > comparison.getEntityId2())
+                    comparison = new Comparison(false, comparison.getEntityId2(), comparison.getEntityId1());
+
+                if (uComp.contains(comparison)) continue;
+
                 double weight = getWeight(block.getBlockIndex(), comparison);
                 if (weight < averageWeight) {
                     continue;
                 }
+                uComp.add(comparison);
                 entities1.add(comparison.getEntityId1());
                 entities2.add(comparison.getEntityId2());
             }
@@ -65,21 +78,34 @@ public class EdgePruning extends AbstractMetablocking {
         blocks.addAll(newBlocks);
     }
 
-    private void setAverageWeight(List<AbstractBlock> blocks) {
+    protected void setAverageWeight(List<AbstractBlock> blocks) {
         averageWeight = 0;
         for (AbstractBlock block : blocks) {
-            ComparisonIterator iterator = block.getComparisonIterator();
+            QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
+            HashSet<Comparison> uComp = new HashSet<>();
             while (iterator.hasNext()) {
                 Comparison comparison = iterator.next();
+                if (comparison.getEntityId1() == comparison.getEntityId2()) continue;
+                if (comparison.getEntityId1() > comparison.getEntityId2())
+                    comparison = new Comparison(false, comparison.getEntityId2(), comparison.getEntityId1());
+
+                if (uComp.contains(comparison)) continue;
                 double weight = getWeight(block.getBlockIndex(), comparison);
+//                System.err.println(weight);
                 if (weight < 0) {
                     continue;
                 }
-
+                ucomps++;
+                uComp.add(comparison);
+                if(!Double.isNaN(weight))
                 averageWeight += weight;
+//                 System.err.println(weight);
             }
         }
-        averageWeight /= validComparisons;
+
+        System.out.println("Average weight\t:\t" + averageWeight);
+        averageWeight /= (double) ucomps;
+        System.out.println("validComparisons\t:\t" + ucomps);
         System.out.println("Average weight\t:\t" + averageWeight);
     }
 }

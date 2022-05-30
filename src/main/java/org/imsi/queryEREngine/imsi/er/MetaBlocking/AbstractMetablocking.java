@@ -15,10 +15,7 @@
 package org.imsi.queryEREngine.imsi.er.MetaBlocking;
 
 
-import org.imsi.queryEREngine.imsi.er.DataStructures.AbstractBlock;
-import org.imsi.queryEREngine.imsi.er.DataStructures.Comparison;
-import org.imsi.queryEREngine.imsi.er.DataStructures.DecomposedBlock;
-import org.imsi.queryEREngine.imsi.er.DataStructures.EntityIndex;
+import org.imsi.queryEREngine.imsi.er.DataStructures.*;
 import org.imsi.queryEREngine.imsi.er.EfficiencyLayer.AbstractEfficiencyMethod;
 import org.imsi.queryEREngine.imsi.er.Utilities.ComparisonIterator;
 import org.imsi.queryEREngine.imsi.er.Utilities.Converter;
@@ -62,6 +59,13 @@ public abstract class AbstractMetablocking extends AbstractEfficiencyMethod {
             index++;
         }
         return new DecomposedBlock(cleanCleanER, entityIds1, entityIds2);
+    }
+
+    protected void initializeEntityIndex(List<AbstractBlock> blocks) {
+        if (entityIndex == null) {
+            entityIndex = new EntityIndex(blocks);
+        }
+        totalBlocks = blocks.size();
     }
 
     protected void getStatistics(List<AbstractBlock> blocks) {
@@ -108,6 +112,16 @@ public abstract class AbstractMetablocking extends AbstractEfficiencyMethod {
     }
     protected boolean isRepeated(int blockIndex, Comparison comparison) {
        return entityIndex.isRepeated(blockIndex,comparison);
+    }
+
+    protected  double getUniWeight(int blockIndex, Comparison comparison, UnilateralBlock block) {
+        double commonBlocks = entityIndex.getNoOfCommonBlocks(blockIndex, comparison);
+        if (commonBlocks < 0) {
+            return commonBlocks;
+        }
+//        commonBlocks = commonBlocks*blockIndex;
+        int f = block.getEntities().length /block.getQueryEntities().length;
+        return (commonBlocks * Math.log10(totalBlocks / entityIndex.getNoOfEntityBlocks(comparison.getEntityId1(), 0)) * Math.log10(totalBlocks / entityIndex.getNoOfEntityBlocks(comparison.getEntityId2(), comparison.isCleanCleanER() ? 1 : 0)))*f;///Math.log10(block.getQueryEntities().length);
     }
 
     protected double getWeight(int blockIndex, Comparison comparison) {

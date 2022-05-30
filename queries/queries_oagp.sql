@@ -9,7 +9,7 @@
 -- --Q5
 --
 --
--- SELECT DEDUP * FROM oag.papers200k WHERE year > 2012
+SELECT DEDUP * FROM oag.papers200k WHERE year > 2012
 -- SELECT DEDUP * FROM oag.papers200k WHERE year > 2008
 -- SELECT DEDUP * FROM oag.papers200k WHERE year > 2003
 -- SELECT DEDUP * FROM oag.papers200k WHERE year > 1995
@@ -24,7 +24,7 @@
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 2012
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 2008
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 2003
-SELECT DEDUP * FROM oag.papers1m WHERE year > 1995
+-- SELECT DEDUP * FROM oag.papers1m WHERE year > 1995
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 1990
 --
 -- SELECT DEDUP * FROM oag.papers1m500k WHERE year > 2012

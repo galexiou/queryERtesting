@@ -149,6 +149,9 @@ public class DeduplicationExecution<T> {
         double blockJoinEnd = System.currentTimeMillis();
         String blockJoinTime = Double.toString((blockJoinEnd - blockJoinStart) / 1000);
 
+        double selectivity = qIds.size()/1000000d;
+        System.err.println("Q Selectivity:\t"+selectivity);
+
 //        long blockAssingments = 0;
 //        long tbc = 0;
 //        for (AbstractBlock block : blocks) {
@@ -242,9 +245,9 @@ public class DeduplicationExecution<T> {
             // EDGE PRUNINGx
             double edgePruningStartTime = System.currentTimeMillis();
 
-//            EfficientEdgePruning eEP = new EfficientEdgePruning(qIds);
+            EfficientEdgePruning eEP = new EfficientEdgePruning(qIds);
 //            CardinalityEdgePruning eEP = new CardinalityEdgePruning(WeightingScheme.ECBS, qIds, eb);
-            CardinalityEdgePruning eEP = new CardinalityEdgePruning(WeightingScheme.ECBS, qIds);
+//            CardinalityEdgePruning eEP = new CardinalityEdgePruning(WeightingScheme.ECBS, qIds);
             if (runEP) {
                 eEP.applyProcessing(blocks);
                 double edgePruningEndTime = System.currentTimeMillis();

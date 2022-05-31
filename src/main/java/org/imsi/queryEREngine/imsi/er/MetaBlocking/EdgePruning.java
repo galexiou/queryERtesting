@@ -4,7 +4,6 @@ import org.imsi.queryEREngine.imsi.er.DataStructures.AbstractBlock;
 import org.imsi.queryEREngine.imsi.er.DataStructures.BilateralBlock;
 import org.imsi.queryEREngine.imsi.er.DataStructures.Comparison;
 import org.imsi.queryEREngine.imsi.er.Utilities.AbstractMetablocking;
-import org.imsi.queryEREngine.imsi.er.Utilities.ComparisonIterator;
 import org.imsi.queryEREngine.imsi.er.Utilities.MetaBlockingConfiguration.WeightingScheme;
 import org.imsi.queryEREngine.imsi.er.Utilities.QueryComparisonIterator;
 
@@ -65,10 +64,10 @@ public class EdgePruning extends AbstractMetablocking {
                 if (uComp.contains(comparison)) continue;
 
                 double weight = getWeight(block.getBlockIndex(), comparison);
+                uComp.add(comparison);
                 if (weight < averageWeight) {
                     continue;
                 }
-                uComp.add(comparison);
                 entities1.add(comparison.getEntityId1());
                 entities2.add(comparison.getEntityId2());
             }
@@ -80,6 +79,9 @@ public class EdgePruning extends AbstractMetablocking {
 
     protected void setAverageWeight(List<AbstractBlock> blocks) {
         averageWeight = 0;
+        int limit = 3000;
+        double mean = 0.0f;
+        int counter = 0;
         for (AbstractBlock block : blocks) {
             QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
             HashSet<Comparison> uComp = new HashSet<>();
@@ -92,20 +94,27 @@ public class EdgePruning extends AbstractMetablocking {
                 if (uComp.contains(comparison)) continue;
                 double weight = getWeight(block.getBlockIndex(), comparison);
 //                System.err.println(weight);
+                uComp.add(comparison);
                 if (weight < 0) {
                     continue;
                 }
                 ucomps++;
-                uComp.add(comparison);
-                if(!Double.isNaN(weight))
-                averageWeight += weight;
-//                 System.err.println(weight);
+                if (counter < limit) mean += weight;
+                else if (counter == limit) {
+                    averageWeight = (mean / limit)+0.5;
+                    System.err.println("GA\t" + averageWeight);
+                    break;
+                }
+                counter++;
+
             }
+            if(averageWeight>0) break;
+
         }
 
-        System.out.println("Average weight\t:\t" + averageWeight);
-        averageWeight /= (double) ucomps;
-        System.out.println("validComparisons\t:\t" + ucomps);
-        System.out.println("Average weight\t:\t" + averageWeight);
+//        System.out.println("Average weight\t:\t" + averageWeight);
+////        averageWeight /= (double) ucomps;
+//        System.out.println("validComparisons\t:\t" + ucomps);
+//        System.out.println("Average weight\t:\t" + averageWeight);
     }
 }

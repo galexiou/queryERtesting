@@ -144,6 +144,7 @@ public abstract class AbstractMetablocking extends AbstractEfficiencyMethod {
                 if (commonBlocks < 0) {
                     return commonBlocks;
                 }
+//                if(commonBlocks==0 || Double.isNaN(commonBlocks)) System.err.println("Cb "+commonBlocks);
                 return commonBlocks * Math.log10(totalBlocks / entityIndex.getNoOfEntityBlocks(comparison.getEntityId1(), 0)) * Math.log10(totalBlocks / entityIndex.getNoOfEntityBlocks(comparison.getEntityId2(), comparison.isCleanCleanER() ? 1 : 0));
             case JS:
                 double commonBlocksJS = entityIndex.getNoOfCommonBlocks(blockIndex, comparison);

@@ -1,8 +1,7 @@
 package  org.imsi.queryEREngine.imsi.er.MetaBlocking;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.imsi.queryEREngine.imsi.er.Comparators.BlockCardinalityComparator;
 import org.imsi.queryEREngine.imsi.er.DataStructures.AbstractBlock;
@@ -165,17 +164,16 @@ public class BlockFiltering extends AbstractEfficiencyMethod {
 
     protected void restructureUnilateraBlocks(List<AbstractBlock> blocks) {
         final List<AbstractBlock> newBlocks = new ArrayList<AbstractBlock>();
-        //        for(int i : limitsD1) {
-        //        	System.out.println(i);
-        //        }
+
         for (AbstractBlock block : blocks) {
             UnilateralBlock oldBlock = (UnilateralBlock) block;
             int[] queryEntities = oldBlock.getQueryEntities();
-            final List<Integer> retainedEntities = new ArrayList<Integer>();
+            final Set<Integer> retainedEntities = new HashSet<>();
             for (int entityId : oldBlock.getEntities()) {
                 if (counterD1[entityId] < limitsD1[entityId]) {
                     retainedEntities.add(entityId);
                 }
+                //retainedEntities.addAll(Arrays.stream(queryEntities).boxed().collect(Collectors.toList()));
             }
 
             if (1 < retainedEntities.size()) {
@@ -184,8 +182,9 @@ public class BlockFiltering extends AbstractEfficiencyMethod {
                     counterD1[entityId]++;
                 }
                 UnilateralBlock nb = new UnilateralBlock(blockEntities);
-                nb.setQueryEntities(queryEntities);
-//				newBlocks.add(new UnilateralBlock(blockEntities));
+                nb.setQueryEntities(Arrays.stream(queryEntities).filter(retainedEntities::contains).toArray());
+                if(nb.getQueryEntities().length==0) continue;
+//                nb.setQueryEntities(queryEntities);
                 newBlocks.add(nb);
             }
         }

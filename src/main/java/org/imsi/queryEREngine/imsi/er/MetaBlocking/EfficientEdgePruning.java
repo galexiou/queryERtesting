@@ -17,20 +17,20 @@ public class EfficientEdgePruning extends EdgePruning {
 
     public EfficientEdgePruning(Set<Integer> qIds) {
         super("Efficient Edge Pruning", qIds, WeightingScheme.ECBS);
-        averageWeight = 18.545;
+        averageWeight = Double.MIN_VALUE;
     }
 
     @Override
     public void applyProcessing(List<AbstractBlock> blocks) {
         double s = System.currentTimeMillis();
         getStatistics(blocks, qIds);
-        System.out.println("Statistics: " + (System.currentTimeMillis() - s)/1000);
+        System.out.println("Statistics Time: " + (System.currentTimeMillis() - s)/1000);
 //    	initializeEntityIndex(blocks);
         s = System.currentTimeMillis();
-//        setAverageWeight(blocks);
-        System.out.println("Average: " + (System.currentTimeMillis() - s)/1000);
+        setAverageWeight(blocks);
+        System.out.println("Average W time: " + (System.currentTimeMillis() - s)/1000);
         s = System.currentTimeMillis();
         filterComparisons(blocks);
-        System.out.println("Filter: " + (System.currentTimeMillis() - s)/1000);
+        System.out.println("Filter time: " + (System.currentTimeMillis() - s)/1000);
     }
 }

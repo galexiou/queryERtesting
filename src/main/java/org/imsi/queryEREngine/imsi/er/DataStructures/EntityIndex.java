@@ -171,7 +171,7 @@ public class EntityIndex implements Serializable {
         int[] blocks1 = entityBlocks[comparison.getEntityId1()];
         int[] blocks2 = entityBlocks[comparison.getEntityId2() + datasetLimit];
 
-//        if(blocks1.length==0 || blocks2.length==0) System.err.println(blocks1.length+"    "+blocks2.length);
+        if(blocks1.length==0 || blocks2.length==0) System.err.println(blocks1.length+"    "+blocks2.length);
 
         boolean firstCommonIndex = false;
         int commonBlocks = 0;
@@ -468,14 +468,17 @@ public class EntityIndex implements Serializable {
     private void setNoOfUnilateralEntities(List<AbstractBlock> blocks) {
         noOfEntities = Integer.MIN_VALUE;
         datasetLimit = 0;
+        int en = 0;
         for (AbstractBlock block : blocks) {
             UnilateralBlock bilBlock = (UnilateralBlock) block;
+            en+=((UnilateralBlock) block).getEntities().length;
             for (int id : bilBlock.getEntities()) {
                 if (noOfEntities < id + 1) {
                     noOfEntities = id + 1;
                 }
             }
         }
+//        System.err.println(en+"  -----   "+noOfEntities);
     }
 
     public int[][] getEntityBlocks() {

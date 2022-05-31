@@ -24,7 +24,7 @@
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 2012
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 2008
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 2003
--- SELECT DEDUP * FROM oag.papers1m WHERE year > 1995
+SELECT DEDUP * FROM oag.papers1m WHERE year > 1995
 -- SELECT DEDUP * FROM oag.papers1m WHERE year > 1990
 --
 -- SELECT DEDUP * FROM oag.papers1m500k WHERE year > 2012
@@ -50,8 +50,9 @@
 -- SELECT DEDUP * FROM oag.papers200k WHERE MOD(id, 4) < 1
 -- SELECT DEDUP * FROM oag.papers200k WHERE MOD(id, 10) < 1
 -- SELECT DEDUP * FROM oag.papers200k  WHERE MOD(index, 20) < 1
+-- SELECT DEDUP * FROM oag.papers200k  WHERE MOD(index, 15) < 1
 -- SELECT DEDUP * FROM oag.papers200k  WHERE MOD(index, 4) < 1
-SELECT DEDUP * FROM oag.papers1m WHERE MOD(index, 3) < 1
+SELECT DEDUP * FROM oag.papers1m WHERE MOD(index, 4) < 1
 -- SELECT DEDUP * FROM oag.papers1m500k WHERE MOD(id, 30) < 1
 -- SELECT DEDUP * FROM oag.papers2m WHERE MOD(id, 40) < 1
 --

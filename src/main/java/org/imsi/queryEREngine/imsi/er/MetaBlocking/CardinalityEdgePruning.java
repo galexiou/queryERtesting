@@ -65,9 +65,9 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
     //    private void addComparison(Comparison comparison, HashMap<Double,Integer> levels) {
     private void addComparison(Comparison comparison) {
-        if (comparison.getUtilityMeasure() < minimumWeight) {
-            return;
-        }
+//        if (comparison.getUtilityMeasure() < minimumWeight) {
+//            return;
+//        }
 
         topKEdges.add(comparison);
         if (kThreshold < topKEdges.size()) {
@@ -103,7 +103,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         int wcounter = 0;
         int ccounter = 0;
         int counterSelf = 0;
-        int limit = 3000;
+        int limit = 10000;
         double mean = 0.0f;
         int counter = 0;
 //        for (AbstractBlock block : blocks) {
@@ -158,16 +158,20 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 //                int[] weightAndFCB = getWeightWithFCB(block.getBlockIndex(), comparison);
 //                double weight = weightAndFCB[0];
                 uComp.add(comparison);
-                if (weight < 0 || weight < averageWeight) {
+                if (weight < 0 || weight < averageWeight || weight < minimumWeight) {
                     continue;
                 }
+//                if (weight < 0  || weight < minimumWeight) {
+//                    continue;
+//                }
 //                if (weight < 0 ) {
 //                    continue;
 //                }
                 if (counter < limit) mean += weight;
                 else if (counter == limit) {
-                    averageWeight = mean/limit;
+                    averageWeight = mean/counter;
                     System.err.println("AVG\t" + averageWeight);
+                    while (topKEdges.poll().getUtilityMeasure()<averageWeight);
                 }
                 counter++;
 //                if(weight==1) counter3++;
@@ -234,7 +238,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         System.err.println(blockAssingments + "     " + tbc);
         kThreshold = blockAssingments / 2;
 //        kThreshold -= 180000;
-        kThreshold = (long) (kThreshold * 0.8);
+//        kThreshold = (long) (kThreshold * 0.8);
 //        System.err.println(Math.sqrt(qIds.size()));
 //        System.err.println(Math.sqrt(850000));
 //        System.err.println(Math.sqrt(50000));

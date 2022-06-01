@@ -63,8 +63,8 @@ public class ExecuteBlockComparisons<T> {
 		int comparisons = 0;
 		UnionFind uFind = new UnionFind(qIds);
 
-		Set<AbstractBlock> nBlocks = new HashSet<>(blocks);
-		Set<String> uComparisons = new HashSet<>();
+//		Set<AbstractBlock> nBlocks = new HashSet<>(blocks);
+//		Set<String> uComparisons = new HashSet<>();
 		HashMap<Integer, HashMap<Integer,Double>> similarities = new HashMap<>();
 		this.noOfFields = noOfFields;
 		double compTime = 0.0;
@@ -72,9 +72,9 @@ public class ExecuteBlockComparisons<T> {
 		DumpDirectories dumpDirectories = new DumpDirectories();
 		HashMap<Integer, Long> offsetIds = (HashMap<Integer, Long>) SerializationUtilities
 				.loadSerializedObject(dumpDirectories.getOffsetsDirPath() + tableName);
-		for (AbstractBlock block : nBlocks) {
+		for (AbstractBlock block : blocks) {
 			ComparisonIterator iterator = block.getComparisonIterator();
-			//QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
+//			QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
 
 			while (iterator.hasNext()) {
 				Comparison comparison = iterator.next();
@@ -82,14 +82,14 @@ public class ExecuteBlockComparisons<T> {
 				int id2 = comparison.getEntityId2();
 //				if (!qIds.contains(id1) && !qIds.contains(id2))
 //					continue;
-				String uniqueComp = "";
-				if (comparison.getEntityId1() > comparison.getEntityId2())
-					uniqueComp = id1 + "u" + id2;
-				else
-					uniqueComp = id2 + "u" + id1;
-				if (uComparisons.contains(uniqueComp))
-					continue;
-				uComparisons.add(uniqueComp);
+//				String uniqueComp = "";
+//				if (comparison.getEntityId1() > comparison.getEntityId2())
+//					uniqueComp = id1 + "u" + id2;
+//				else
+//					uniqueComp = id2 + "u" + id1;
+//				if (uComparisons.contains(uniqueComp))
+//					continue;
+//				uComparisons.add(uniqueComp);
 
 				Object[] entity1 = getEntity(offsetIds.get(id1), id1);
 				Object[] entity2 = getEntity(offsetIds.get(id2), id2);

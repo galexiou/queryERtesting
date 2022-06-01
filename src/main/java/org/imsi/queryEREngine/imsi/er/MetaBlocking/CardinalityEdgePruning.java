@@ -33,7 +33,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
     protected int[][] entityBlocks;
     protected Set<Integer> bIds;
     protected AbstractBlock blocka;
-    protected double averageWeight =  Double.MIN_VALUE;
+    protected double averageWeight = Double.MIN_VALUE;
 
     public CardinalityEdgePruning(WeightingScheme scheme) {
         super("Cardinality Edge Pruning (Top-K Edges)", scheme);
@@ -96,67 +96,41 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         gatherComparisons(blocks);
     }
 
+    protected void removeIf(Comparison c) {
+        if (c.getUtilityMeasure() < averageWeight) topKEdges.remove(c);
+    }
+
     protected void filterComparisons(List<AbstractBlock> blocks) {
         minimumWeight = Double.MIN_VALUE;
-        topKEdges = new PriorityQueue<Comparison>((int) (2 * kThreshold), new ComparisonWeightComparator());
+        topKEdges = new PriorityQueue<Comparison>((int) ( 2*kThreshold), new ComparisonWeightComparator());
 
-        int wcounter = 0;
         int ccounter = 0;
         int counterSelf = 0;
         int limit = 10000;
         double mean = 0.0f;
         int counter = 0;
-//        for (AbstractBlock block : blocks) {
-//            HashSet<Comparison> uComp = new HashSet<>();
-//            QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
-//            while (iterator.hasNext()) {
-//                Comparison comparison = iterator.next();
-//                if (comparison.getEntityId1() == comparison.getEntityId2()) continue;
-//
-//                if (comparison.getEntityId1() > comparison.getEntityId2())
-//                    comparison = new Comparison(false, comparison.getEntityId2(), comparison.getEntityId1());
-//
-//                if (uComp.contains(comparison)) continue;
-//                if (isRepeated(block.getBlockIndex(), comparison)) continue;
-//                uComp.add(comparison);
-//                double weight = getNoOfCommonBlocks(comparison);
-//                if(weight<3) wcounter++;
-//                if(weight==3) counter3++;
-//                ccounter++;
-//                comparison.setUtilityMeasure(weight);
-//                addComparison(comparison);
-//            }
-//        }
-        for (AbstractBlock block : blocks) {
 
-//            if(block instanceof UnilateralBlock ){
-//                UnilateralBlock uBlock = (UnilateralBlock) block;
-//                if(uBlock.getQueryEntities().length == 0) continue;
-//            }
+        for (AbstractBlock block : blocks) {
 
             HashSet<Comparison> uComp = new HashSet<>();
             QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
             while (iterator.hasNext()) {
                 Comparison comparison = iterator.next();
+                int entity1 = comparison.getEntityId1();
+                int entity2 = comparison.getEntityId2();
 
                 ccounter++;
 
 
-                if (comparison.getEntityId1() == comparison.getEntityId2()) continue;
+                if (entity1 == entity2) continue;
 
                 counterSelf++;
 
-                if (comparison.getEntityId1() > comparison.getEntityId2())
-                    comparison = new Comparison(false, comparison.getEntityId2(), comparison.getEntityId1());
+                if (entity1 > entity2)
+                    comparison = new Comparison(false, entity2, entity1);
 
                 if (uComp.contains(comparison)) continue;
-//                double weight = getWeightWithBlocks(block.getBlockIndex(), comparison,blocks);
-//                double weight = getUniWeight(block.getBlockIndex(), comparison,(UnilateralBlock)block);
                 double weight = getWeight(block.getBlockIndex(), comparison);
-
-//                double weight = super.getNoOfCommonBlocks(block.getBlockIndex(), comparison);
-//                int[] weightAndFCB = getWeightWithFCB(block.getBlockIndex(), comparison);
-//                double weight = weightAndFCB[0];
                 uComp.add(comparison);
                 if (weight < 0 || weight < averageWeight || weight < minimumWeight) {
                     continue;
@@ -167,77 +141,43 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 //                if (weight < 0 ) {
 //                    continue;
 //                }
-                if (counter < limit) mean += weight;
-                else if (counter == limit) {
-                    averageWeight = mean/counter;
-                    System.err.println("AVG\t" + averageWeight);
-                    while (topKEdges.poll().getUtilityMeasure()<averageWeight);
-                }
-                counter++;
-//                if(weight==1) counter3++;
-//                if(weight<1) wcounter++;
-//                ccounter++;
-//                mean+=weight;
-//                if(Double.isInfinite(weight)) System.err.println(weight);
+
+//                if(counter==1) System.out.println(counter+"\tSIZE->\t"+minimumWeight+"\t"+weight);
+//                if(counter%10000==0) System.out.println(counter+"\tSIZE->\t"+minimumWeight+"\t"+weight);
 
 
                 comparison.setUtilityMeasure(weight);
-//                addComparison(comparison,lvls);
                 addComparison(comparison);
-//                if(ccounter==1) minimumWeight=weight+1;
+                if (counter < limit) mean += weight;
+                else if (counter == limit) {
+                    averageWeight = mean / counter;
+                    System.err.println("AVG\t" + averageWeight);
+                    while (topKEdges.poll().getUtilityMeasure() < averageWeight) ;
+                }
+                counter++;
             }
         }
-
-//        for(Double d : lvls.keySet()){
-//           if(d>20.0) System.out.println(d+" : "+lvls.get(d));
-//        }
-//        System.err.println(wcounter+"   "+ccounter+"  "+counter3);
-//        System.err.println(mean / ccounter);
         System.err.println(ccounter + "  " + counterSelf);
     }
 
     private void gatherComparisons(List<AbstractBlock> blocks) {
         boolean cleanCleanER = blocks.get(0) instanceof BilateralBlock;
         blocks.clear();
-
-//        Queue<Comparison> pqnew = new PriorityQueue<Comparison>((int) (1.5 * kThreshold), new ComparisonWeightComparator());
-//        pqnew.addAll(topKEdges);
-////        for(Comparison comparison : pqnew){
-//        double threshold = topKEdges.poll().getUtilityMeasure();
-//        while (threshold==topKEdges.poll().getUtilityMeasure());
-//        for(int i=0;i<topKEdges.size();i++){
-////            double thres =0.0d;
-////            if(i==0)  thres=topKEdges.poll().getUtilityMeasure();
-//            double meas = topKEdges.poll().getUtilityMeasure();
-//            if(meas>threshold) {
-//                System.err.println(meas + "  -> " + i);
-//                break;
-//            }
-////            if(count>100) break;
-//        }
         System.out.println(topKEdges.peek().getUtilityMeasure());
-//        Queue<Comparison> ll = removelast(topKEdges);
-//        System.out.println(ll.peek().getUtilityMeasure());
-
-//        HashSet<Comparison> set = new HashSet<>();
-//        set.addAll(topKEdges);
-//        System.out.println(set.size()+"   "+ topKEdges.size());
         blocks.add(getDecomposedBlock(cleanCleanER, topKEdges));
     }
 
     protected void getKThreshold(List<AbstractBlock> blocks) {
         long blockAssingments = 0;
         long tbc = 0;
-        System.out.println("Blcokgs size: " + blocks.size());
+        System.out.println("Blocks size: " + blocks.size());
         for (AbstractBlock block : blocks) {
-//            UnilateralBlock bb = (UnilateralBlock) block;
-//            bb.setQueryEntities();
             blockAssingments += block.getTotalBlockAssignments();
             tbc += block.getNoOfComparisons();
         }
         System.err.println(blockAssingments + "     " + tbc);
         kThreshold = blockAssingments / 2;
-//        kThreshold -= 180000;
+//        kThreshold = (long) (tbc*0.05);
 //        kThreshold = (long) (kThreshold * 0.8);
 //        System.err.println(Math.sqrt(qIds.size()));
 //        System.err.println(Math.sqrt(850000));

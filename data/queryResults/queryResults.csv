@@ -1,2 +1,2 @@
 query,runs,time,no_of_blocks,agg_cardinality,CC,entities_in_blocks,detected_duplicates,PC,PQ
-"SELECT DEDUP * FROM oag.papers1m WHERE year > 1995",1,234.512,1,1895237.0,2.0,334438,26275,0.9410816618911175,0.013863701479023468,
+"SELECT DEDUP * FROM oag.papers1m WHERE MOD(index, 3) < 1",1,182.555,1,1890644.0,2.0,350125,18940,0.9572424946932174,0.010017750565415805,

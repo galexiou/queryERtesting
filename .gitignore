@@ -86,3 +86,4 @@ nb-configuration.xml
 queries/*
 model.json
 old_queries/*
+*.properties

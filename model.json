@@ -7,7 +7,7 @@
       "type": "custom",
       "factory": "org.imsi.queryEREngine.imsi.calcite.adapter.csv.CsvSchemaFactory",
       "operand": {
-        "directory": "/Users/giorgos/Documents/IMSI/testing",
+        "directory": "/Users/vasilisstamatopoulos/Documents/Works/ATHENA/Projects/VF/queryER-data/testing",
         "flavor": "translatable"
       }
     }

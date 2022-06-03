@@ -1,11 +1,15 @@
 package org.imsi.queryEREngine.imsi.er.BlockIndex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.imsi.queryEREngine.imsi.er.DataStructures.*;
 import org.imsi.queryEREngine.imsi.er.Utilities.Converter;
 import org.imsi.queryEREngine.imsi.er.Utilities.DumpDirectories;
 import org.imsi.queryEREngine.imsi.er.Utilities.SerializationUtilities;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,6 +19,23 @@ public class QueryBlockIndex extends BlockIndex {
 
     public QueryBlockIndex() {
         this.qIds = new HashSet<>();
+    }
+
+    public QueryBlockIndex(String tableName) {
+        this();
+        blockIndexStatistic = loadBlockIndexStatistic(tableName);
+    }
+
+    public BlockIndexStatistic
+            loadBlockIndexStatistic(String tableName){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(new File(dumpDirectories.getBlockIndexStatsDirPath() + tableName + ".json"),
+                    BlockIndexStatistic.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static List<AbstractBlock> parseIndex(Map<String, Set<Integer>> invertedIndex, Set<Integer> qIds) {

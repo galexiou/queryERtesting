@@ -290,35 +290,6 @@ public class Experiments {
 		return parser;
 	}
 
-	private static OffsetIdsMap offsetToIds(String tableName) throws IOException {
-
-		Map<String, Table> tableMap = CsvSchema.tableMap;
-		Table table = tableMap.get(tableName);
-		CsvTranslatableTable csvTable = (CsvTranslatableTable) table;
-		CsvParser parser = openCsv(csvTable.getSource().path());
-		String[] row;
-		HashMap<Integer, Integer> offsetToId = new HashMap<>();
-		HashMap<Integer, Integer> idToOffset = new HashMap<>();
-
-		long rowOffset = parser.getContext().currentChar() - 1;
-		while ((row = parser.parseNext()) != null) {
-			int rowOffsetInt = (int) rowOffset;
-			try {
-				Integer id = Integer.parseInt(row[csvTable.getKey()]);
-				offsetToId.put(rowOffsetInt, id);
-//	        	System.out.print(rowOffsetInt + " = ");
-//	        	for(String s : row) System.out.print(s + ", ");
-//	        	System.out.println();
-				idToOffset.put(id, rowOffsetInt);
-			}
-			catch(Exception e) {
-			}
-
-			rowOffset = parser.getContext().currentChar() - 1;
-		}
-		return new OffsetIdsMap(offsetToId, idToOffset);
-	}
-
 	@SuppressWarnings("unchecked")
 	private static void calculateGroundTruth(CalciteConnection calciteConnection, String query, FileWriter csvWriter) throws SQLException, IOException {
 
@@ -401,7 +372,7 @@ public class Experiments {
 
 
 		final AbstractDuplicatePropagation duplicatePropagation = new UnilateralDuplicatePropagation(groundDups);
-		System.out.println("Existing Duplicates\t:\t" + duplicatePropagation.getDuplicates().size());
+		//System.out.println("Existing Duplicates\t:\t" + duplicatePropagation.getDuplicates().size());
 		List<AbstractBlock> blocks = DeduplicationExecution.blocks;
 		duplicatePropagation.resetDuplicates();
 		BlockStatistics bStats = new BlockStatistics(blocks, duplicatePropagation, csvWriter);
@@ -411,7 +382,7 @@ public class Experiments {
 		double sz_before = matches.size();
 		matches.removeAll(groundMatches);
 		double sz_after = matches.size();
-		System.out.println("ACC\t:\t " + sz_after/sz_before);
+		//System.out.println("ACC\t:\t " + sz_after/sz_before);
 		csvWriter.flush();
 
 	}

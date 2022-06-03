@@ -92,13 +92,6 @@ public class DeduplicationExecution<T> {
         System.out.println("Deduplicating: " + tableName);
         double deduplicateStartTime = System.currentTimeMillis() - setPropertiesTime;
 
-//        System.out.println(Math.log(35560));
-//        System.out.println(Math.log10(35560)/35560);
-//        System.out.println(Math.log1p(35560));
-//        System.out.println("---------------");
-//        System.out.println(Math.log(100));
-//        System.out.println(Math.log10(100));
-//        System.out.println(Math.log1p(100));
         // Check for links and remove qIds that have links
         double linksStartTime = System.currentTimeMillis();
         HashMap<Integer, Set<Integer>> links = loadLinks(tableName);
@@ -107,9 +100,9 @@ public class DeduplicationExecution<T> {
         Set<Integer> qIds = new HashSet<>();
         Set<Integer> totalIds = new HashSet<>();
 
-//        qIds = MapUtilities.deepCopySet(queryData.keySet());
-//        double idsTime = storeIds(qIds);
-//        deduplicateStartTime -= idsTime;
+        qIds = MapUtilities.deepCopySet(queryData.keySet());
+        double idsTime = storeIds(qIds);
+        deduplicateStartTime -= idsTime;
 
         /* If there are links then we get all ids that are in the links HashMap (both on keys and the values).
          * Then we get all these data and put it onto the dataWithLinks hashMap.
@@ -135,7 +128,7 @@ public class DeduplicationExecution<T> {
         String queryDataSize = Integer.toString(queryData.size());
 
         double blockingStartTime = System.currentTimeMillis();
-        QueryBlockIndex queryBlockIndex = new QueryBlockIndex();
+        QueryBlockIndex queryBlockIndex = new QueryBlockIndex(tableName);
         queryBlockIndex.createBlockIndex(queryData, key);
         queryBlockIndex.buildQueryBlocks();
         qIds = queryBlockIndex.getIds();
@@ -149,19 +142,8 @@ public class DeduplicationExecution<T> {
         double blockJoinEnd = System.currentTimeMillis();
         String blockJoinTime = Double.toString((blockJoinEnd - blockJoinStart) / 1000);
 
-        double selectivity = qIds.size()/1000000d;
+        double selectivity = qIds.size() / (double) queryBlockIndex.getBlockIndexStatistic().getTableSize();
         System.err.println("Q Selectivity:\t"+selectivity);
-
-//        long blockAssingments = 0;
-//        long tbc = 0;
-//        for (AbstractBlock block : blocks) {
-////            UnilateralBlock bb = (UnilateralBlock) block;
-////            bb.setQueryEntities();
-//            blockAssingments += block.getTotalBlockAssignments();
-//            tbc +=block.getNoOfComparisons();
-//        }
-
-//        System.err.println(blockAssingments+"     "+tbc);
 
         String blocksSize = Integer.toString(blocks.size());
         String blockSizes = getBlockSizes(blocks);
@@ -182,38 +164,6 @@ public class DeduplicationExecution<T> {
         String purgingBlockSizes = getBlockSizes(blocks);
         int entities = queryBlockIndex.blocksToEntities(blocks).size();
         String purgeBlockEntities = Integer.toString(entities);
-//        double comps = 0.0;
-//
-//		for(AbstractBlock block : blocks) {
-//			comps += block.getNoOfComparisons();
-//		}
-
-
-//        Set<Integer> test = new HashSet<>();
-//        for (int i = 0; i <eb.length; i++) {
-//            if(eb[i].length>0){
-//                for (int j = 0; j < eb[i].length; j++) {
-//                    System.err.println(i + ":");
-//                    System.err.println(eb[i][j]);
-//                }
-//                if(eb[i].length>100) break;
-//            }
-//
-//        }
-//        System.err.println(eb.length);
-
-
-//        EntityIndex ei = new EntityIndex(blocks);
-//        int[][] eb = ei.getEntityBlocks();
-
-//        System.out.println("Arxikos: "+eb.length);
-//        for(int i = 0; i<eb.length; i++){
-////            if(eb[i].length>0) System.err.println(eb[i].length+"  "+i);
-//        }
-//
-////        int i = eb[2][0];
-//        AbstractBlock ab = blocks.get(0);
-
 
         String filterBlocksSize = "";
         String filterTime = "";
@@ -226,8 +176,6 @@ public class DeduplicationExecution<T> {
         if (blocks.size() > 10) {
             // FILTERING
             double blockFilteringStartTime = System.currentTimeMillis();
-//            if(tableName.contains("publications")) filterParam = 0.55;
-//            BlockQueryFiltering bFiltering = new BlockQueryFiltering(filterParam);
             BlockFiltering bFiltering = new BlockFiltering(filterParam);
             if (runBF) bFiltering.applyProcessing(blocks);
 
@@ -239,14 +187,8 @@ public class DeduplicationExecution<T> {
 
             blocks.remove(blocks.size() - 1);
 
-
-
-
-            // EDGE PRUNINGx
+            // EDGE PRUNING
             double edgePruningStartTime = System.currentTimeMillis();
-
-//            EfficientEdgePruning eEP = new EfficientEdgePruning(qIds);
-//            CardinalityEdgePruning eEP = new CardinalityEdgePruning(WeightingScheme.ECBS, qIds, eb);
             CardinalityEdgePruning eEP = new CardinalityEdgePruning(WeightingScheme.ECBS, qIds);
             if (runEP) {
                 eEP.applyProcessing(blocks);
@@ -260,9 +202,7 @@ public class DeduplicationExecution<T> {
                 epTotalComps = Double.toString(totalComps);
                 ePEntities = Integer.toString(queryBlockIndex.blocksToEntitiesD(blocks).size());
                 epFlag = true;
-
             }
-
         }
         //Get ids of final entities, and add back qIds that were cut from m-blocking
         Set<Integer> blockQids = new HashSet<>();
@@ -305,13 +245,6 @@ public class DeduplicationExecution<T> {
         String totalDeduplicationTime = Double.toString((deduplicateEndTime - deduplicateStartTime) / 1000);
         String linksTime = Double.toString(links1Time + ((links2EndTime - links2StartTime) / 1000));
 
-//        System.out.println("Links Time\t\t" + linksTime);
-//        System.out.println("Blocking Time\t\t" + String.valueOf((blockJoinEnd - blockingStartTime)/1000));
-//        System.out.println("Block Purging Time\t\t" + purgingTime);
-//        System.out.println("Block Filtering Time\t\t" + filterTime);
-//        System.out.println("Edge Pruning Time\t\t" + epTime);
-//        System.out.println("Comparison Execution Time\t\t" + comparisonTime);
-//        System.out.println("Total Deduplication Time\t\t" + totalDeduplicationTime);
         // Log everything
         try {
             FileWriter logWriter = new FileWriter(dumpDirectories.getLogsDirPath(), true);

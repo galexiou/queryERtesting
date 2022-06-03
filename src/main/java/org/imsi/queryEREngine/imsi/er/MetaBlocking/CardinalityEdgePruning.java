@@ -65,10 +65,6 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
     //    private void addComparison(Comparison comparison, HashMap<Double,Integer> levels) {
     private void addComparison(Comparison comparison) {
-//        if (comparison.getUtilityMeasure() < minimumWeight) {
-//            return;
-//        }
-
         topKEdges.add(comparison);
         if (kThreshold < topKEdges.size()) {
             Comparison lastComparison = topKEdges.poll();
@@ -83,15 +79,9 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
     @Override
     public void applyProcessing(List<AbstractBlock> blocks) {
         double s = System.currentTimeMillis();
-//        getStatistics(blocks);
         initializeEntityIndex(blocks);
-//        this.entityBlocks = getEntityIndex().getEntityBlocks();
-        System.out.println("Statistics: " + (System.currentTimeMillis() - s) / 1000);
+//        System.out.println("Statistics: " + (System.currentTimeMillis() - s) / 1000);
         getKThreshold(blocks);
-//        bIds = new HashSet<>();
-//        for (AbstractBlock b : blocks) {
-//            bIds.add(b.getBlockIndex());
-//        }
         filterComparisons(blocks);
         gatherComparisons(blocks);
     }
@@ -141,41 +131,33 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 //                if (weight < 0 ) {
 //                    continue;
 //                }
-
-//                if(counter==1) System.out.println(counter+"\tSIZE->\t"+minimumWeight+"\t"+weight);
-//                if(counter%10000==0) System.out.println(counter+"\tSIZE->\t"+minimumWeight+"\t"+weight);
-
-
                 comparison.setUtilityMeasure(weight);
                 addComparison(comparison);
                 if (counter < limit) mean += weight;
                 else if (counter == limit) {
                     averageWeight = mean / counter;
-                    System.err.println("AVG\t" + averageWeight);
                     while (topKEdges.poll().getUtilityMeasure() < averageWeight) ;
                 }
                 counter++;
             }
         }
-        System.err.println(ccounter + "  " + counterSelf);
     }
 
     private void gatherComparisons(List<AbstractBlock> blocks) {
         boolean cleanCleanER = blocks.get(0) instanceof BilateralBlock;
         blocks.clear();
-        System.out.println(topKEdges.peek().getUtilityMeasure());
+        //System.out.println(topKEdges.peek().getUtilityMeasure());
         blocks.add(getDecomposedBlock(cleanCleanER, topKEdges));
     }
 
     protected void getKThreshold(List<AbstractBlock> blocks) {
         long blockAssingments = 0;
         long tbc = 0;
-        System.out.println("Blocks size: " + blocks.size());
+        //System.out.println("Blocks size: " + blocks.size());
         for (AbstractBlock block : blocks) {
             blockAssingments += block.getTotalBlockAssignments();
             tbc += block.getNoOfComparisons();
         }
-        System.err.println(blockAssingments + "     " + tbc);
         kThreshold = blockAssingments / 2;
 //        kThreshold = (long) (tbc*0.05);
 //        kThreshold = (long) (kThreshold * 0.8);
@@ -184,7 +166,6 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 //        System.err.println(Math.sqrt(50000));
 //        System.err.println(Math.sqrt(50000));
 //        kThreshold = (long) (qIds.size() / 0.75);
-        System.out.println(kThreshold);
     }
 
     public int getNoOfCommonBlocks(Comparison comparison) {
@@ -221,11 +202,8 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         while (pq.size() > (kThreshold - 180000)) {
             pqnew.add((Comparison) pq.poll());
             topKEdges.poll();
-//            pq.poll();
         }
 
-//        pq.clear();
         return pqnew;
-//        return pq;
     }
 }

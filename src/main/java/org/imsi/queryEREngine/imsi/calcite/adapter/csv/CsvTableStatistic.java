@@ -54,7 +54,7 @@ public class CsvTableStatistic {
 		//sampleTable();
 		//deduplicate();
 		//getJoins();
-		getCardinalities();
+		//getCardinalities();
 
 	}
 	

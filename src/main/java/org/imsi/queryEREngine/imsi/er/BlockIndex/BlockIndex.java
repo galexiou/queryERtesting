@@ -60,8 +60,7 @@ implements  TranslatableTable {
 	protected Map<String, Integer> tfIdf;
 	protected Set<Integer> joinedIds;
 	protected Map<Integer, Set<String>> entitiesToBlocks;
-	protected static ExtendedCanopyClustering eCC;
-	private DumpDirectories dumpDirectories = new DumpDirectories();
+	protected DumpDirectories dumpDirectories = new DumpDirectories();
 	
 	public BlockIndex() {
 		this.entityProfiles = new ArrayList<EntityProfile>();

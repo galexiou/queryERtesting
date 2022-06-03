@@ -131,8 +131,7 @@ public class CsvSchema extends AbstractSchema {
 						break;
 					}
 				}
-				// createVETI(source, table.getKey(), tableName);
-				// computeTableStatistics(table, tableName, files, source);
+				//computeTableStatistics(table, tableName, files, source);
 				builder.put(sourceSansCsv.relative(baseSource).path(), table);
 				if(tableName.contains("ground_truth")) continue;
 				BaseBlockIndex blockIndex = createBlockIndex(table, tableName);
@@ -146,7 +145,7 @@ public class CsvSchema extends AbstractSchema {
 
 
 	private void computeTableStatistics(CsvTranslatableTable table, String tableName, File[] files, Source source) {
-		if(!new File("/data/bstam/data/tableStats/table" + tableName + ".json").exists()) {
+		if(!(new File(dumpDirectories.getTableStatsDirPath() +  tableName + ".json")).exists()) {
 			AtomicBoolean ab = new AtomicBoolean();
 			ab.set(false);
 			@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -175,17 +174,17 @@ public class CsvSchema extends AbstractSchema {
 			CsvEnumerator<Object[]> enumerator = new CsvEnumerator(table.getSource(), ab,
 					table.getFieldTypes(), table.getKey(), offsetIndex);
 
-			blockIndex.createBlockIndex(enumerator, table.getKey());
+			int tableSize = blockIndex.createBlockIndex(enumerator, table.getKey());
 			blockIndex.buildBlocks();
 			double end = System.currentTimeMillis();
 			System.out.println("Created in: " + (end - start)/1000 + " seconds");
 			blockIndex.sortIndex();
 			blockIndex.storeBlockIndex(dumpDirectories.getBlockIndexDirPath(), tableName);
 			SerializationUtilities.storeSerializedObject(offsetIndex,dumpDirectories.getOffsetsDirPath() + tableName);
-
 			// Statistics
 			BlockIndexStatistic blockIndexStatistic = new BlockIndexStatistic(blockIndex.getInvertedIndex(),
 					blockIndex.getEntitiesToBlocks(), tableName);
+			blockIndexStatistic.setTableSize(tableSize);
 			blockIndex.setBlockIndexStatistic(blockIndexStatistic);
 			try {
 				blockIndexStatistic.storeStatistics();

@@ -35,6 +35,7 @@ public class BlockIndexStatistic implements Serializable {
 	private Map<String, Set<Integer>> invertedIndex;
 	private Map<Integer, Set<String>> entitiesToBlocks;
 	private Map<String, Integer> blocksHistogram;
+	private int tableSize;
 	private Map<Integer, String> tokenToIndexMap;
 	private List<AbstractBlock> blocks;
 	private EntityIndex entityIndex;
@@ -52,7 +53,9 @@ public class BlockIndexStatistic implements Serializable {
 		super();
 	}
 	public BlockIndexStatistic(HashMap<String, Double> averageBlockWeight, double averageWeight, 
-			double validComparisons, double totalComparisons, double meanEntitiesPerBlock, double meanComparisonsPerBlock) {
+			double validComparisons, double totalComparisons, double meanEntitiesPerBlock,
+							   double meanComparisonsPerBlock, int tableSize) {
+		this.tableSize = tableSize;
 		this.averageBlockWeight = averageBlockWeight;
 		this.averageWeight = averageWeight;
 		this.validComparisons = validComparisons;
@@ -61,7 +64,8 @@ public class BlockIndexStatistic implements Serializable {
 		this.meanComparisonsPerBlock = meanComparisonsPerBlock;
 	}
 
-	public BlockIndexStatistic(Map<String, Set<Integer>> invertedIndex, Map<Integer, Set<String>> entitiesToBlocks, String tableName) {
+	public BlockIndexStatistic(Map<String, Set<Integer>> invertedIndex,
+							   Map<Integer, Set<String>> entitiesToBlocks, String tableName) {
 		this.invertedIndex = invertedIndex;
 		this.entitiesToBlocks = entitiesToBlocks;
 		this.tokenToIndexMap = new HashMap<>(invertedIndex.size());
@@ -71,9 +75,9 @@ public class BlockIndexStatistic implements Serializable {
 				.collect(Collectors.toMap(Entry::getKey, e -> Integer.valueOf(e.getValue().size())));
 		this.tableName = tableName;
 		this.averageBlockWeight = new HashMap<>();
-		metaBlocking();
-		calculateValidComparisons();
-		getCBS();
+//		metaBlocking();
+//		calculateValidComparisons();
+//		getCBS();
 	}
 	
 	protected void metaBlocking() {
@@ -87,7 +91,7 @@ public class BlockIndexStatistic implements Serializable {
 		}
 		purgeBlocks(getMaxComparisonsPerBlock(blocksSize, uniqueComparisons));
 		clearEntitiesToBlocks();
-		filterBlocks(0.4);
+		filterBlocks(0.5);
 		this.blocks = parseIndex(invertedIndex);
 	}
 	
@@ -261,6 +265,8 @@ public class BlockIndexStatistic implements Serializable {
         }
         return previousSize;
     }
+	public void setTableSize(int tableSize) {this.tableSize = tableSize; }
+	public int getTableSize(int tableSize) {return  tableSize; }
 	public double getAverageWeight() {
 		return averageWeight;
 	}
@@ -302,5 +308,9 @@ public class BlockIndexStatistic implements Serializable {
 	}
 	public void setMeanComparisonsPerBlock(double meanComparisonsPerBlock) {
 		this.meanComparisonsPerBlock = meanComparisonsPerBlock;
+	}
+
+	public int getTableSize() {
+		return tableSize;
 	}
 }

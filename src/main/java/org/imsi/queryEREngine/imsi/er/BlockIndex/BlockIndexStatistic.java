@@ -75,9 +75,9 @@ public class BlockIndexStatistic implements Serializable {
 				.collect(Collectors.toMap(Entry::getKey, e -> Integer.valueOf(e.getValue().size())));
 		this.tableName = tableName;
 		this.averageBlockWeight = new HashMap<>();
-//		metaBlocking();
-//		calculateValidComparisons();
-//		getCBS();
+		metaBlocking();
+		calculateValidComparisons();
+		//getCBS();
 	}
 	
 	protected void metaBlocking() {

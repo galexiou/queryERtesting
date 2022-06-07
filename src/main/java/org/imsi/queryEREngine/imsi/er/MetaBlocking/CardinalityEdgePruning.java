@@ -81,7 +81,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
         int ccounter = 0;
         int counterSelf = 0;
-        int limit = (int) Math.floor(400000 * selectivity);
+        int limit = (int) Math.floor(qIds.size());
         System.out.println(limit);
         double mean = 0.0f;
         int counter = 0;

@@ -156,8 +156,14 @@ public class CsvEnumerator<E> implements Enumerator<E> {
 	@Override
 	public boolean moveNext() {
 		for (;;) {
+			String[] strings;
 			long rowOffset = parser.getContext().currentChar() - 1;
-			final String[] strings = parser.parseNext();
+			try {
+				strings = parser.parseNext();
+			}
+			catch (Exception e){
+				strings = parser.parseNext();
+			}
 
 			if (strings == null) {
 				current = null;

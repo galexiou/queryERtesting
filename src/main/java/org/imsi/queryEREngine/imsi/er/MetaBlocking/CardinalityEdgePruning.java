@@ -31,9 +31,8 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
     protected Queue<Comparison> topKEdges;
     protected Set<Integer> qIds;
     protected int[][] entityBlocks;
-    protected Set<Integer> bIds;
-    protected AbstractBlock blocka;
     protected double averageWeight = Double.MIN_VALUE;
+    protected double selectivity;
 
     public CardinalityEdgePruning(WeightingScheme scheme) {
         super("Cardinality Edge Pruning (Top-K Edges)", scheme);
@@ -43,25 +42,11 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         super(description, scheme);
     }
 
-    public CardinalityEdgePruning(WeightingScheme scheme, Set<Integer> qIds) {
+    public CardinalityEdgePruning(WeightingScheme scheme, Set<Integer> qIds, double selectivity) {
         super("", scheme);
         this.qIds = qIds;
-
+        this.selectivity = selectivity;
     }
-
-    public CardinalityEdgePruning(WeightingScheme scheme, Set<Integer> qIds, int[][] entityBlocks) {
-        super("", scheme);
-        this.qIds = qIds;
-        this.entityBlocks = entityBlocks;
-    }
-
-    public CardinalityEdgePruning(WeightingScheme scheme, Set<Integer> qIds, int[][] entityBlocks, AbstractBlock blocka) {
-        super("", scheme);
-        this.qIds = qIds;
-        this.entityBlocks = entityBlocks;
-        this.blocka = blocka;
-    }
-
 
     //    private void addComparison(Comparison comparison, HashMap<Double,Integer> levels) {
     private void addComparison(Comparison comparison) {
@@ -96,7 +81,8 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
         int ccounter = 0;
         int counterSelf = 0;
-        int limit = 40000;
+        int limit = (int) Math.floor(40000 * selectivity);
+        System.out.println(limit);
         double mean = 0.0f;
         int counter = 0;
 
@@ -109,12 +95,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
                 int entity1 = comparison.getEntityId1();
                 int entity2 = comparison.getEntityId2();
 
-                ccounter++;
-
-
                 if (entity1 == entity2) continue;
-
-                counterSelf++;
 
                 if (entity1 > entity2)
                     comparison = new Comparison(false, entity2, entity1);
@@ -125,12 +106,6 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
                 if (weight < 0 || weight < averageWeight || weight < minimumWeight) {
                     continue;
                 }
-//                if (weight < 0  || weight < minimumWeight) {
-//                    continue;
-//                }
-//                if (weight < 0 ) {
-//                    continue;
-//                }
                 comparison.setUtilityMeasure(weight);
                 addComparison(comparison);
                 if (counter < limit) mean += weight;
@@ -164,7 +139,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 //        System.err.println(Math.sqrt(qIds.size()));
 //        System.err.println(Math.sqrt(850000));
 //        System.err.println(Math.sqrt(50000));
-//        System.err.println(Math.sqrt(50000));
+//        System.err.println(Math.sqrt(50000));s
 //        kThreshold = (long) (qIds.size() / 0.75);
     }
 

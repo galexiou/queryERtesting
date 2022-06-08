@@ -135,7 +135,8 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
             blockAssingments += block.getTotalBlockAssignments();
             tbc += block.getNoOfComparisons();
         }
-        kThreshold = blockAssingments / 2;
+        kThreshold = Math.min(Math.round(blockAssingments *  (selectivity + 0.2)), blockAssingments);
+        System.err.println(kThreshold);
 //        kThreshold = (long) (tbc*0.05);
 //        kThreshold = (long) (kThreshold * 0.8);
 //        System.err.println(Math.sqrt(qIds.size()));

@@ -138,7 +138,6 @@ public class QueryBlockIndex extends BlockIndex {
         Set<Integer> joinedEntityIds = new HashSet<>();
         for (AbstractBlock block : blocks) {
             DecomposedBlock dBlock = (DecomposedBlock) block;
-
             int[] entities1 = dBlock.getEntities1();
             int[] entities2 = dBlock.getEntities2();
             joinedEntityIds.addAll(Arrays.stream(entities1).boxed().collect(Collectors.toSet()));

@@ -23,6 +23,7 @@ import org.imsi.queryEREngine.apache.calcite.util.Util;
 import org.imsi.queryEREngine.imsi.calcite.adapter.csv.CsvFieldType;
 
 import com.google.common.collect.ImmutableList;
+import org.imsi.queryEREngine.imsi.er.Utilities.DeduplicationProperties;
 
 /**
  * @author bstam

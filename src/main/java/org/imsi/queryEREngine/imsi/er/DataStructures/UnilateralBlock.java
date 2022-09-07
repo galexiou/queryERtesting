@@ -66,7 +66,7 @@ public class UnilateralBlock extends AbstractBlock implements Serializable {
         boolean qE = queryEntities.length > 0;
         if (qE) noOfQueryEntities = queryEntities.length;
 //		System.err.println(noOfEntities+"   ###   "+noOfQueryEntities);
-        if (qE) return (noOfQueryEntities * noOfEntities)-noOfQueryEntities;
+        if (qE) return (noOfQueryEntities * noOfEntities) - noOfQueryEntities;
 
         return noOfEntities * (noOfEntities - 1) / 2;
     }

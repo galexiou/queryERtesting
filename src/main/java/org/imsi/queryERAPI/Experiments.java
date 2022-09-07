@@ -329,8 +329,6 @@ public class Experiments {
 			for (Integer value : qIds) {
 				if (currSet == null || currSet.size() == groundTruthDivide)
 					inIdsSets.add(currSet = new HashSet<>());
-//			    Integer id = offsetToId.get(value);
-//			    if(id == null) continue;//  bug fix
 				currSet.add(value);
 			}
 			List<String> inIds = new ArrayList<>();
@@ -351,20 +349,16 @@ public class Experiments {
 				while (gtQueryResults.next()) {
 					Integer id_d = Integer.parseInt(gtQueryResults.getString("id_d"));
 					Integer id_s = Integer.parseInt(gtQueryResults.getString("id_s"));
-//					Integer offset_d = idsToOffset.get(id_d);
-//					Integer offset_s = idsToOffset.get(id_s);
-//					if(offset_d == null || offset_s == null) continue; //  bug fix
 					IdDuplicates idd = new IdDuplicates(id_d, id_s);
 					groundDups.add(idd);
-
-					String uniqueComp = "";
-					if (id_d > id_s)
-						uniqueComp = id_d + "u" + id_s;
-					else
-						uniqueComp = id_d + "u" + id_s;
-					if (groundMatches.contains(uniqueComp))
-						continue;
-					groundMatches.add(uniqueComp);
+//					String uniqueComp = "";
+//					if (id_d > id_s)
+//						uniqueComp = id_d + "u" + id_s;
+//					else
+//						uniqueComp = id_s + "u" + id_d;
+//					if (groundMatches.contains(uniqueComp))
+//						continue;
+//					groundMatches.add(uniqueComp);
 				}
 			}
 			SerializationUtilities.storeSerializedObject(groundDups, dumpDirectories.getGroundTruthDirPath() + name);
@@ -372,7 +366,7 @@ public class Experiments {
 
 
 		final AbstractDuplicatePropagation duplicatePropagation = new UnilateralDuplicatePropagation(groundDups);
-		//System.out.println("Existing Duplicates\t:\t" + duplicatePropagation.getDuplicates().size());
+		System.out.println("Existing Duplicates\t:\t" + duplicatePropagation.getDuplicates().size());
 		List<AbstractBlock> blocks = DeduplicationExecution.blocks;
 		duplicatePropagation.resetDuplicates();
 		BlockStatistics bStats = new BlockStatistics(blocks, duplicatePropagation, csvWriter);

@@ -52,22 +52,13 @@ public class DeduplicationExecution<T> {
      */
 
 
-    private static final String pathToPropertiesFile = "deduplication.properties";
-    private static final String BP = "mb.bp";
-    private static final String BF = "mb.bf";
-    private static final String EP = "mb.ep";
-    private static final String LINKS = "links";
-    private static final String FILTER_PARAM = "filter.param";
+
     public static List<AbstractBlock> blocks;
     public static Set<Integer> qIds = new HashSet<>();
-    private static Properties properties;
-    private static boolean runBP = true;
-    private static boolean runBF = true;
-    private static boolean runEP = true;
-    private static boolean runLinks = true;
-    private static double filterParam = 0.0;
+
     private static double scanTime = 0.0;
-    private static DumpDirectories dumpDirectories = new DumpDirectories();
+    private static final DumpDirectories dumpDirectories = new DumpDirectories();
+    private static final DeduplicationProperties deduplicationProperties = new DeduplicationProperties();
 
     @SuppressWarnings({"rawtypes", "unchecked"})
 
@@ -84,13 +75,11 @@ public class DeduplicationExecution<T> {
     public static EntityResolvedTuple deduplicate(HashMap<Integer, Object[]> queryData, Integer key, Integer noOfAttributes,
                                                   String tableName, Enumerator<Object[]> originalEnumerator, String source) {
 
-        double setPropertiesStartTime = System.currentTimeMillis();
-        setProperties();
-        double setPropertiesTime = (System.currentTimeMillis() - setPropertiesStartTime);
+
         boolean firstDedup = false;
 
         System.out.println("Deduplicating: " + tableName);
-        double deduplicateStartTime = System.currentTimeMillis() - setPropertiesTime;
+        double deduplicateStartTime = System.currentTimeMillis();
 
         // Check for links and remove qIds that have links
         double linksStartTime = System.currentTimeMillis();
@@ -155,7 +144,7 @@ public class DeduplicationExecution<T> {
         double blockPurgingStartTime = System.currentTimeMillis();
 
         ComparisonsBasedBlockPurging blockPurging = new ComparisonsBasedBlockPurging();
-        if (runBP) blockPurging.applyProcessing(blocks);
+        if (deduplicationProperties.isRunBP()) blockPurging.applyProcessing(blocks);
 
         double blockPurgingEndTime = System.currentTimeMillis();
 
@@ -176,9 +165,8 @@ public class DeduplicationExecution<T> {
         if (blocks.size() > 10) {
             // FILTERING
             double blockFilteringStartTime = System.currentTimeMillis();
-            BlockFiltering bFiltering = new BlockFiltering(filterParam);
-            if (runBF) bFiltering.applyProcessing(blocks);
-
+            BlockFiltering bFiltering = new BlockFiltering(deduplicationProperties.getFilterParam());
+            if (deduplicationProperties.isRunBF()) bFiltering.applyProcessing(blocks);
             double blockFilteringEndTime = System.currentTimeMillis();
             filterBlocksSize = Integer.toString(blocks.size());
             filterTime = Double.toString((blockFilteringEndTime - blockFilteringStartTime) / 1000);
@@ -190,7 +178,7 @@ public class DeduplicationExecution<T> {
             // EDGE PRUNING
             double edgePruningStartTime = System.currentTimeMillis();
             CardinalityEdgePruning eEP = new CardinalityEdgePruning(WeightingScheme.ECBS, qIds, selectivity);
-            if (runEP) {
+            if (deduplicationProperties.isRunEP()) {
                 eEP.applyProcessing(blocks);
                 double edgePruningEndTime = System.currentTimeMillis();
 
@@ -232,7 +220,7 @@ public class DeduplicationExecution<T> {
         EntityResolvedTuple<?> entityResolvedTuple = ebc.comparisonExecutionAll(blocks, qIdsNoLinks, key, noOfAttributes,tableName);
         double comparisonEndTime = System.currentTimeMillis();
         double links2StartTime = System.currentTimeMillis();
-        entityResolvedTuple.mergeLinks(links, tableName, firstDedup, totalIds, runLinks);
+        entityResolvedTuple.mergeLinks(links, tableName, firstDedup, totalIds, deduplicationProperties.isRunLinks());
         double links2EndTime = System.currentTimeMillis();
 
         Integer executedComparisons = entityResolvedTuple.getComparisons();
@@ -357,7 +345,7 @@ public class DeduplicationExecution<T> {
     }
 
     public static HashMap<Integer, Set<Integer>> loadLinks(String table) {
-        if (new File(dumpDirectories.getLinksDirPath() + table).exists() && runLinks)
+        if (new File(dumpDirectories.getLinksDirPath() + table).exists() && deduplicationProperties.isRunLinks())
             return (HashMap<Integer, Set<Integer>>) SerializationUtilities.loadSerializedObject(dumpDirectories.getLinksDirPath() + table);
         else return null;
     }
@@ -405,28 +393,6 @@ public class DeduplicationExecution<T> {
     }
 
 
-    private static void setProperties() {
-        properties = loadProperties();
-        if (!properties.isEmpty()) {
-            runBP = Boolean.parseBoolean(properties.getProperty(BP));
-            runBF = Boolean.parseBoolean(properties.getProperty(BF));
-            runEP = Boolean.parseBoolean(properties.getProperty(EP));
-            runLinks = Boolean.parseBoolean(properties.getProperty(LINKS));
-            filterParam = Double.parseDouble(properties.getProperty(FILTER_PARAM));
-        }
-    }
 
-    private static Properties loadProperties() {
-
-        Properties prop = new Properties();
-        try (InputStream input = DeduplicationExecution.class.getClassLoader().getResourceAsStream(pathToPropertiesFile)) {
-            // load a properties file
-            prop.load(input);
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return prop;
-    }
 
 }

@@ -88,3 +88,4 @@ model.json
 old_queries/*
 *.properties
 data/*
+data/ 

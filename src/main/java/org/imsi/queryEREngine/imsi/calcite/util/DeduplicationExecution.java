@@ -133,10 +133,27 @@ public class DeduplicationExecution<T> {
         double selectivity = qIds.size() / (double) queryBlockIndex.getBlockIndexStatistic().getTableSize();
         System.err.println("Q Selectivity:\t"+selectivity);
 
+
+
         String blocksSize = Integer.toString(blocks.size());
         String blockSizes = getBlockSizes(blocks);
         String blockEntities = Integer.toString(queryBlockIndex.blocksToEntities(blocks).size());
 
+        //sort queryblockindex  by size of values   (block size)
+
+        queryBlockIndex.sortIndex();
+
+        Set<String> keys = queryBlockIndex.getInvertedIndex().keySet();
+
+        keys.forEach(k -> {
+            if (queryBlockIndex.getInvertedIndex().get(k).size() > 1) {
+                System.out.println("Key: " + k + " Value: " + queryBlockIndex.getInvertedIndex().get(k));
+            }
+        });
+
+
+
+            // META BLOCKING
 
 
         // PURGING

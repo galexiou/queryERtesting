@@ -1,3 +1,4 @@
+
 -- 5, 10, 15, 20, 25, 30, 35, 40, 45, 50
 
 SELECT DEDUP * FROM oag.publications WHERE MOD(id, 40) < 1

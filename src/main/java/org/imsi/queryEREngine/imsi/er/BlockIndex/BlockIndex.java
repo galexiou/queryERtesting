@@ -3,8 +3,7 @@ package org.imsi.queryEREngine.imsi.er.BlockIndex;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.imsi.queryEREngine.apache.calcite.plan.RelOptTable;
 import org.imsi.queryEREngine.apache.calcite.plan.RelOptTable.ToRelContext;
 import org.imsi.queryEREngine.apache.calcite.rel.RelCollation;
@@ -94,10 +94,33 @@ implements  TranslatableTable {
 	@SuppressWarnings("unchecked")
 	protected Map<String, Set<Integer>> indexEntities(int sourceId, List<EntityProfile> profiles) {
 		invertedIndex = new HashMap<String, Set<Integer>>();
-		InputStream file = this.getClass().getClassLoader().getResourceAsStream("stopwords_SER");
+		InputStream txtFile = this.getClass().getClassLoader().getResourceAsStream("stopwords/stopwords.txt");
 		//file = new File(this.getClass().getClassLoader().getResource("stopwords_SER").toExternalForm());
+		HashSet<String> stopwords1 = new HashSet<>();
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(txtFile));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				stopwords1.add(line.trim());
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		SerializationUtilities.storeSerializedObject(stopwords1, "src/main/resources/stopwords_SER");
+
+		InputStream file = this.getClass().getClassLoader().getResourceAsStream("stopwords_SER");
 		HashSet<String> stopwords = (HashSet<String>) SerializationUtilities
 				.loadSerializedObject(file);
+
+
+
+
+
 		HashMap<String, Integer> tfIdf = new HashMap<>();
 		for (EntityProfile profile : profiles) {
 			for (Attribute attribute : profile.getAttributes()) {

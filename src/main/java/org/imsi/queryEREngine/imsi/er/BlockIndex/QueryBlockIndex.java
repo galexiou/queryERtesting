@@ -43,12 +43,8 @@ public class QueryBlockIndex extends BlockIndex {
         for (Map.Entry<String, Set<Integer>> term : invertedIndex.entrySet()) {
             if (1 < term.getValue().size()) {
                 int[] idsArray = Converter.convertListToArray(term.getValue());
-//                int[] queryEntities = Arrays.stream(idsArray).filter(qIds::contains).toArray();
-//                int[] entities = Arrays.stream(idsArray).filter(e -> !qIds.contains(e)).toArray();
                 UnilateralBlock uBlock = new UnilateralBlock(idsArray, qIds);
-//                BilateralBlock bBlock = new BilateralBlock(entities, queryEntities);
                 blocks.add(uBlock);
-//                blocks.add(bBlock);
             }
         }
         invertedIndex.clear();

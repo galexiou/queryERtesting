@@ -62,22 +62,23 @@ public class DeduplicationExecution<T> {
     @SuppressWarnings({"rawtypes", "unchecked"})
 
     public static <T> EntityResolvedTuple deduplicateEnumerator(Enumerable<T> enumerable, String tableName,
-                                                                Integer key, String source, List<CsvFieldType> fieldTypes, AtomicBoolean ab) {
+                                                                Integer key, String source, List<CsvFieldType> fieldTypes, AtomicBoolean ab, List<String> tokens) {
         CsvEnumerator<Object[]> originalEnumerator = new CsvEnumerator(Sources.of(new File(source)), ab, fieldTypes, key);
         double scanStart = System.currentTimeMillis();
         HashMap<Integer, Object[]> queryData = createMap((AbstractEnumerable<Object[]>) enumerable, key);
         scanTime = (System.currentTimeMillis() - scanStart) / 1000;
-        return deduplicate(queryData, key, fieldTypes.size(), tableName, originalEnumerator, source);
+        return deduplicate(queryData, key, fieldTypes.size(), tableName, originalEnumerator, source, tokens);
 
     }
 
     public static EntityResolvedTuple deduplicate(HashMap<Integer, Object[]> queryData, Integer key, Integer noOfAttributes,
-                                                  String tableName, Enumerator<Object[]> originalEnumerator, String source) {
+                                                  String tableName, Enumerator<Object[]> originalEnumerator, String source, List<String> tokens) {
 
 
         boolean firstDedup = false;
 
         System.out.println("Deduplicating: " + tableName);
+        System.out.println(tokens);
         double deduplicateStartTime = System.currentTimeMillis();
 
         // Check for links and remove qIds that have links

@@ -88,7 +88,7 @@ public class DeduplicationJoinExecution {
 
 		//Deduplicate the dirty table
 		EntityResolvedTuple entityResolvedTuple = DeduplicationExecution.deduplicate(filteredData, keyRight, rightTableSize,
-				rightTableName, originalEnumerator, sourceRight);
+				rightTableName, originalEnumerator, sourceRight, new ArrayList<>());
 
 
 		EntityResolvedTuple joinedEntityResolvedTuple  =
@@ -151,7 +151,7 @@ public class DeduplicationJoinExecution {
 
 		// Deduplicate the dirty table
 		EntityResolvedTuple entityResolvedTuple = DeduplicationExecution.deduplicate(filteredData, keyLeft, leftTableSize,
-				leftTableName, originalEnumerator, sourceLeft);
+				leftTableName, originalEnumerator, sourceLeft, new ArrayList<>());
 		// Reverse the right, left structure
 		EntityResolvedTuple  joinedEntityResolvedTuple =
 				deduplicateJoin(entityResolvedTuple, right, leftKeySelector, rightKeySelector,

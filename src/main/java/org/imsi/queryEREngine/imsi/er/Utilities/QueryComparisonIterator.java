@@ -88,7 +88,6 @@ public class QueryComparisonIterator implements Iterator<Comparison> {
 
             return new Comparison(true, bilBlock.getIndex1Entities()[outerLoop], bilBlock.getIndex2Entities()[innerLoop]);
         } else if (block instanceof UnilateralBlock) {
-
             innerLoop++;
             if (innerLimit < innerLoop) {
                 innerLoop = 0;
@@ -100,7 +99,7 @@ public class QueryComparisonIterator implements Iterator<Comparison> {
             }
             int e1 = queryEntities[outerLoop];
             int e2 = entities[innerLoop];
-            if(e1==e2) executedComparisons--;
+            if(e1 == e2) executedComparisons--;
             return new Comparison(false, e1, e2);
         } else if (block instanceof DecomposedBlock) {
             DecomposedBlock deBlock = (DecomposedBlock) block;

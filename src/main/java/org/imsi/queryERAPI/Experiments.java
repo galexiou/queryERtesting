@@ -2,7 +2,6 @@ package org.imsi.queryERAPI;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,18 +17,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.imsi.queryEREngine.apache.calcite.jdbc.CalciteConnection;
-import org.imsi.queryEREngine.apache.calcite.schema.Table;
 import org.imsi.queryEREngine.apache.calcite.sql.parser.SqlParseException;
 import org.imsi.queryEREngine.apache.calcite.tools.RelConversionException;
 import org.imsi.queryEREngine.apache.calcite.tools.ValidationException;
-import org.imsi.queryEREngine.imsi.calcite.adapter.csv.CsvSchema;
-import org.imsi.queryEREngine.imsi.calcite.adapter.csv.CsvTranslatableTable;
 import org.imsi.queryEREngine.imsi.calcite.util.DeduplicationExecution;
 import org.imsi.queryEREngine.imsi.er.ConnectionPool.CalciteConnectionPool;
 import org.imsi.queryEREngine.imsi.er.DataStructures.AbstractBlock;
@@ -39,10 +34,7 @@ import org.imsi.queryEREngine.imsi.er.EfficiencyLayer.ComparisonRefinement.Unila
 import org.imsi.queryEREngine.imsi.er.Utilities.BlockStatistics;
 import org.imsi.queryEREngine.imsi.er.Utilities.DumpDirectories;
 import org.imsi.queryEREngine.imsi.er.Utilities.ExecuteBlockComparisons;
-import org.imsi.queryEREngine.imsi.er.Utilities.OffsetIdsMap;
 import org.imsi.queryEREngine.imsi.er.Utilities.SerializationUtilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
@@ -102,6 +94,16 @@ public class Experiments {
 
 		// Enter a query or read query from file
 		List<String> queries = new ArrayList<>();
+		File resultDir = new File("./data/queryResults");
+		if(resultDir.exists()) {
+			FileUtils.cleanDirectory(resultDir); //clean out directory (this is optional -- but good know)
+			FileUtils.forceDelete(resultDir); //delete directory
+			FileUtils.forceMkdir(resultDir); //create directory
+		}
+		else FileUtils.forceMkdir(resultDir); //create directory
+		File queryFile = new File("./data/queryResults/queryResults.csv");
+		FileWriter csvWriter = new FileWriter(queryFile);
+		csvWriter.append("query,runs,time,no_of_blocks,agg_cardinality,CC,entities_in_blocks,detected_duplicates,PC,PQ\n");
 		initializeDB(calciteConnection, schemaName);
 		if(queryFilePath == null) {
 			while(true) {
@@ -113,9 +115,9 @@ public class Experiments {
 					double queryEndTime = System.currentTimeMillis();
 					runTime = (queryEndTime - queryStartTime)/1000;
 					//printQueryContents(queryResults);
-					exportQueryContent(queryResults, "./data/queryResults.csv");
+					//exportQueryContent(queryResults, "./data/queryResults.csv");
 					if(calculateGroundTruth)
-						calculateGroundTruth(calciteConnection, query, null);
+						calculateGroundTruth(calciteConnection, query, csvWriter);
 					System.out.println("Finished query, time: " + runTime);
 				}
 				catch(Exception e) {

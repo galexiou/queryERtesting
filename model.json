@@ -5,9 +5,9 @@
      {
       "name": "oag",
       "type": "custom",
-      "factory": "org.imsi.queryEREngine.imsi.calcite.adapter.csv.CsvSchemaFactory",
+      "factory": "org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv.CsvSchemaFactory",
       "operand": {
-        "directory": "/Users/vasilisstamatopoulos/Documents/Works/ATHENA/Projects/VF/queryER-data/testing",
+        "directory": "/Users/vasilisstamatopoulos/Documents/Works/ATHENA/Projects/VF/queryER-data/alaska",
         "flavor": "translatable"
       }
     }

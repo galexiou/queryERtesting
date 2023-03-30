@@ -1,2 +1,0 @@
-query,runs,time,no_of_blocks,agg_cardinality,CC,entities_in_blocks,detected_duplicates,PC,PQ
-"SELECT DEDUP * FROM oag.papers1m WHERE MOD(index, 3) < 1",1,182.555,1,1890644.0,2.0,350125,18940,0.9572424946932174,0.010017750565415805,

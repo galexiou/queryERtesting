@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.imsi.queryEREngine.imsi.calcite.adapter.csv;
+package org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv;
 
 import org.apache.calcite.linq4j.Enumerator;
 import org.imsi.queryEREngine.apache.calcite.adapter.java.JavaTypeFactory;
@@ -22,10 +22,7 @@ import org.imsi.queryEREngine.apache.calcite.rel.type.RelDataType;
 import org.imsi.queryEREngine.apache.calcite.sql.type.SqlTypeName;
 import org.imsi.queryEREngine.apache.calcite.util.Pair;
 import org.imsi.queryEREngine.apache.calcite.util.Source;
-import org.imsi.queryEREngine.imsi.er.KDebug;
-import org.imsi.queryEREngine.imsi.er.Utilities.RandomAccessReader;
 
-import com.univocity.parsers.common.processor.RowListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 

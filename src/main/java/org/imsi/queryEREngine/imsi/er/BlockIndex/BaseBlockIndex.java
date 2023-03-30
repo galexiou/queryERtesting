@@ -1,6 +1,6 @@
 package org.imsi.queryEREngine.imsi.er.BlockIndex;
 
-import org.imsi.queryEREngine.imsi.calcite.adapter.csv.CsvEnumerator;
+import org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv.CsvEnumerator;
 import org.imsi.queryEREngine.imsi.er.DataStructures.EntityProfile;
 
 public class BaseBlockIndex extends BlockIndex{

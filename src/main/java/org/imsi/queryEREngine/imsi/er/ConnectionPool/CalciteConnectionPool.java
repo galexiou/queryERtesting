@@ -51,6 +51,13 @@ public class CalciteConnectionPool {
 	    final SchemaPlus rootSchema = connection.unwrap(CalciteConnection.class).getRootSchema();
 	    final JdbcSchema schema = JdbcSchema.create(rootSchema, "test", dataSource, null, null);
 	    rootSchema.add("test", schema);
+//
+//		for (String s : connection.unwrap(CalciteConnection.class).getRootSchema().getSubSchemaNames()){
+//			  if(s.equals("metadata")) continue;
+//			  final SchemaPlus ss = connection.unwrap(CalciteConnection.class).getRootSchema().getSubSchema(s);
+//			  final JdbcSchema jdbcSchema = JdbcSchema.create(ss, s, dataSource, null, null);
+//			  rootSchema.add(s, jdbcSchema);
+//		  }
 	    this.connection = connection; // calcite connection
 	    return connection;
 	  }

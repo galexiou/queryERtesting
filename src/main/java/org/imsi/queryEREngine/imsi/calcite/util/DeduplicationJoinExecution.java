@@ -319,7 +319,7 @@ public class DeduplicationJoinExecution {
 					leftCheckedIds.addAll(leftMatchedIds);
 					Set<Integer> rightJoinIds  = new HashSet<>();
 					for (Integer leftMatchedId : leftMatchedIds) {
-						Object[] leftCurrent = leftsMap.get(leftMatchedId);	
+						Object[] leftCurrent = leftsMap.get(leftMatchedId);
 						TKey leftKey = leftKeySelector.apply(leftCurrent);
 						Enumerable<Object[]> rightEnumerable = rightLookup.get(leftKey); // do this for each similar
 						if(rightEnumerable != null) {
@@ -359,8 +359,7 @@ public class DeduplicationJoinExecution {
 				if (DEDUPLICATION_EXEC_LOGGER.isDebugEnabled())
 					DEDUPLICATION_EXEC_LOGGER.debug(left.finalData.size() + "," + right.finalData.size() + "," + joinedEntities.size() + "," +
 							(deduplicateJoinEndTime - deduplicateJoinStartTime) / 1000);
-				System.out.println(left.finalData.size() + "," + right.finalData.size() + "," + joinedEntities.size() + "," +
-						(deduplicateJoinEndTime - deduplicateJoinStartTime) / 1000);
+
 				int len = joinedEntities.get(0).length;
 				return new EntityResolvedTuple(joinedEntities, joinedUFind, len - 1, len);
 	}

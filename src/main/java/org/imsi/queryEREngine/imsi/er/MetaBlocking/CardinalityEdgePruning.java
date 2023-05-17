@@ -33,6 +33,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
     protected int[][] entityBlocks;
     protected double averageWeight = Double.MIN_VALUE;
     protected double selectivity;
+    protected long tbc;
 
     public CardinalityEdgePruning(WeightingScheme scheme) {
         super("Cardinality Edge Pruning (Top-K Edges)", scheme);
@@ -82,9 +83,10 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         int ccounter = 0;
         int counterSelf = 0;
         //int limit = (int) Math.floor(10000 * selectivity);
-        int limit = (int) Math.floor(qIds.size() * selectivity);
-        limit = Math.min(limit, 40000);
+//        int limit = (int) Math.floor(qIds.size() * selectivity);
+//        limit = Math.min(limit, 40000);
         //System.out.println(limit);
+        long limit = tbc;
         double mean = 0.0f;
         int counter = 0;
 
@@ -129,15 +131,14 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
     protected void getKThreshold(List<AbstractBlock> blocks) {
         long blockAssingments = 0;
-        long tbc = 0;
         //System.out.println("Blocks size: " + blocks.size());
         for (AbstractBlock block : blocks) {
             blockAssingments += block.getTotalBlockAssignments();
             tbc += block.getNoOfComparisons();
         }
-        kThreshold = Math.max(Math.round(blockAssingments *  (selectivity + 0.35)), Math.round(blockAssingments * 0.5));
-        kThreshold = Math.min(kThreshold, Math.round(blockAssingments * 0.8));
-
+//        kThreshold = Math.max(Math.round(blockAssingments *  (selectivity + 0.35)), Math.round(blockAssingments * 0.5));
+//        kThreshold = Math.min(kThreshold, Math.round(blockAssingments * 0.8));
+        kThreshold = Math.round(blockAssingments);
 //        kThreshold = Math.min(Math.round(blockAssingments *  (selectivity + 0.35)), Math.round(blockAssingments * 0.8));
 
     }

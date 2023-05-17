@@ -70,4 +70,5 @@ public abstract class AbstractBlock implements Serializable {
 	public abstract double getNoOfComparisons();
 	public abstract double getTotalBlockAssignments();
 	public abstract void setUtilityMeasure();
+
 }

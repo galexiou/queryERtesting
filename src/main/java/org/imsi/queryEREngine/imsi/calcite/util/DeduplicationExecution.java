@@ -144,7 +144,7 @@ public class DeduplicationExecution<T> {
         String blockSizes = getBlockSizes(blocks);
         String blockEntities = Integer.toString(queryBlockIndex.blocksToEntities(blocks).size());
 
-<<<<<<< HEAD
+
         //sort queryblockindex  by size of values   (block size)
 
 //        queryBlockIndex.sortIndex();
@@ -161,8 +161,6 @@ public class DeduplicationExecution<T> {
             // META BLOCKING
 
 
-=======
->>>>>>> 2d6dd872fd68215bdd2a9605bdee80a7541deffa
         // PURGING
         double blockPurgingStartTime = System.currentTimeMillis();
 

@@ -19,6 +19,12 @@ import org.slf4j.LoggerFactory;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
+import org.apache.arrow.flight.FlightProducer;
+import org.apache.arrow.flight.FlightServer;
+import org.apache.arrow.flight.Location;
+import org.apache.arrow.memory.BufferAllocator;
+import org.apache.arrow.memory.RootAllocator;
+
 public class ExecuteBlockComparisons<T> {
 
     private HashMap<Integer, Object[]> newData = new HashMap<>();
@@ -73,6 +79,37 @@ public class ExecuteBlockComparisons<T> {
         DumpDirectories dumpDirectories = new DumpDirectories();
         HashMap<Integer, Long> offsetIds = (HashMap<Integer, Long>) SerializationUtilities
                 .loadSerializedObject(dumpDirectories.getOffsetsDirPath() + tableName);
+
+
+        // Make arrow data handler that holds pairs and the newdata dictionary (hashmap)
+        ArrowDataHandler arrowHandler = new ArrowDataHandler(newData);
+
+        try {
+            //ArrowFlightConnector connector = new ArrowFlightConnector(arrowHandler, 8080);
+//			BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
+//			Location location = Location.forGrpcInsecure("0.0.0.0", 8080);
+//			System.out.println("Attempting server creation...");
+//			FlightServer server = FlightServer.builder(ALLOCATOR, location, new ArrowFlightProducer(arrowHandler, ALLOCATOR)).build();
+//			System.out.println("Server initialized - Attempting start...");
+//			server.start();
+//			System.out.println("Server listening on port " + server.getPort());
+//			server.awaitTermination();
+
+            BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
+			FlightProducer producer = new ArrowFlightProducer(arrowHandler, ALLOCATOR);
+            Location location = Location.forGrpcInsecure("0.0.0.0", 8080);
+            FlightServer server = FlightServer.builder(ALLOCATOR, location, producer)
+                    .build();
+            server.start();
+            System.out.println("Server listening on port " + server.getPort());
+            server.awaitTermination();
+        }
+        catch(Exception e){
+            System.out.println("interesting");
+        }
+
+
+
         for (AbstractBlock block : blocks) {
 //            ComparisonIterator iterator = block.getComparisonIterator();
 			QueryComparisonIterator iterator = block.getQueryComparisonIterator(qIds);
@@ -107,6 +144,7 @@ public class ExecuteBlockComparisons<T> {
                     continue;
                 }
 
+                arrowHandler.addPair(id1, id2);
 
 //                Comparisons: 23227
 //                ufind size: 3397
@@ -129,6 +167,14 @@ public class ExecuteBlockComparisons<T> {
                 }
             }
         }
+
+        arrowHandler.addDictData();
+
+//		try{ connector.start(); }
+//		catch (Exception e){ System.out.println("Error in initializing server");}
+
+        arrowHandler.debug();
+
         try {
             randomAccessReader.close();
         } catch (IOException e) {

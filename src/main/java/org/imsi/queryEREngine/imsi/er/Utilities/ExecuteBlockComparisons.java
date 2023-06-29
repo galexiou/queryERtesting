@@ -20,7 +20,7 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 import org.apache.arrow.flight.FlightProducer;
-import org.apache.arrow.flight.FlightServer;
+import org.apache.arrow.flight.FlightClient;
 import org.apache.arrow.flight.Location;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
@@ -84,29 +84,16 @@ public class ExecuteBlockComparisons<T> {
         // Make arrow data handler that holds pairs and the newdata dictionary (hashmap)
         ArrowDataHandler arrowHandler = new ArrowDataHandler(newData);
 
-        try {
-            //ArrowFlightConnector connector = new ArrowFlightConnector(arrowHandler, 8080);
-//			BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
-//			Location location = Location.forGrpcInsecure("0.0.0.0", 8080);
-//			System.out.println("Attempting server creation...");
-//			FlightServer server = FlightServer.builder(ALLOCATOR, location, new ArrowFlightProducer(arrowHandler, ALLOCATOR)).build();
-//			System.out.println("Server initialized - Attempting start...");
-//			server.start();
-//			System.out.println("Server listening on port " + server.getPort());
-//			server.awaitTermination();
+        BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
+        FlightProducer producer = new ArrowFlightProducer(arrowHandler, ALLOCATOR);
+        Location location = Location.forGrpcInsecure("0.0.0.0", 8080);
+        try (FlightClient flightClient = FlightClient.builder(ALLOCATOR, location).build()) {
+            System.out.println("C1: Client (Location): Connected to " + location.getUri());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
-			FlightProducer producer = new ArrowFlightProducer(arrowHandler, ALLOCATOR);
-            Location location = Location.forGrpcInsecure("0.0.0.0", 8080);
-            FlightServer server = FlightServer.builder(ALLOCATOR, location, producer)
-                    .build();
-            server.start();
-            System.out.println("Server listening on port " + server.getPort());
-            server.awaitTermination();
-        }
-        catch(Exception e){
-            System.out.println("interesting");
-        }
 
 
 

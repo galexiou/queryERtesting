@@ -49,6 +49,11 @@ public class ComparisonsBasedBlockPurging extends AbstractEfficiencyMethod {
         Iterator blocksIterator = blocks.iterator();
         while (blocksIterator.hasNext()) {
             AbstractBlock currentBlock = (AbstractBlock) blocksIterator.next();
+            if(currentBlock.isProtected()){
+                System.err.println("Block is protected "+currentBlock.getNoOfComparisons());
+
+                continue;
+            }
             if (maxComparisonsPerBlock < currentBlock.getNoOfComparisons()) {
                 blocksIterator.remove();
             } 

@@ -7,7 +7,7 @@
       "type": "custom",
       "factory": "org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv.CsvSchemaFactory",
       "operand": {
-        "directory": "/Users/giorgos/Desktop/alaska",
+        "directory": "/Users/giorgos/Desktop/publications",
         "flavor": "translatable"
       }
     }

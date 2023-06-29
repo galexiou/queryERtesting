@@ -79,6 +79,7 @@ public class DeduplicationExecution<T> {
 
         System.out.println("Deduplicating: " + tableName);
         System.out.println(tokens);
+
         double deduplicateStartTime = System.currentTimeMillis();
 
         // Check for links and remove qIds that have links
@@ -118,7 +119,7 @@ public class DeduplicationExecution<T> {
 
         double blockingStartTime = System.currentTimeMillis();
         QueryBlockIndex queryBlockIndex = new QueryBlockIndex(tableName);
-        queryBlockIndex.createBlockIndex(queryData, key);
+        queryBlockIndex.createBlockIndex(queryData, key, tokens);
         queryBlockIndex.buildQueryBlocks();
         qIds = queryBlockIndex.getIds();
         double blockingEndTime = System.currentTimeMillis();
@@ -142,16 +143,15 @@ public class DeduplicationExecution<T> {
 
         //sort queryblockindex  by size of values   (block size)
 
-        queryBlockIndex.sortIndex();
-
-        Set<String> keys = queryBlockIndex.getInvertedIndex().keySet();
-
-        keys.forEach(k -> {
-            if (queryBlockIndex.getInvertedIndex().get(k).size() > 1) {
-                System.out.println("Key: " + k + " Value: " + queryBlockIndex.getInvertedIndex().get(k));
-            }
-        });
-
+//        queryBlockIndex.sortIndex();
+//
+//        Set<String> keys = queryBlockIndex.getInvertedIndex().keySet();
+//
+//        keys.forEach(k -> {
+//            if (queryBlockIndex.getInvertedIndex().get(k).size() > 1) {
+//                System.out.println("Key: " + k + " Value: " + queryBlockIndex.getInvertedIndex().get(k));
+//            }
+//        });
 
 
             // META BLOCKING

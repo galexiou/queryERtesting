@@ -33,6 +33,7 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
     protected int[][] entityBlocks;
     protected double averageWeight = Double.MIN_VALUE;
     protected double selectivity;
+    protected long tbc;
 
     public CardinalityEdgePruning(WeightingScheme scheme) {
         super("Cardinality Edge Pruning (Top-K Edges)", scheme);
@@ -79,13 +80,16 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         minimumWeight = Double.MIN_VALUE;
         topKEdges = new PriorityQueue<Comparison>((int) (2 * kThreshold), new ComparisonWeightComparator());
 
+        HashMap<Double, Integer> weightLevels = new HashMap<>();
+
         int ccounter = 0;
         int counterSelf = 0;
         //int limit = (int) Math.floor(10000 * selectivity);
         int limit = (int) Math.floor(qIds.size() * selectivity) * 10;
 //        limit = Math.min(limit, 40000);
         limit = (int) kThreshold;
-        System.out.println("LIMIT: " + limit);
+        limit = (int) tbc;
+                System.out.println("LIMIT: " + limit);
         double mean = 0.0f;
         int counter = 0;
         int cc = 0;
@@ -109,6 +113,9 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
                 if (uComp.contains(comparison)) continue;
                 double weight = getWeight(block.getBlockIndex(), comparison);
+
+                weightLevels.put(weight, weightLevels.getOrDefault(weight, 0) + 1);
+
                 uComp.add(comparison);
                 if (weight < 0 || weight < averageWeight || weight < minimumWeight) {
                     continue;
@@ -126,7 +133,13 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
                 counter++;
             }
         }
-        System.err.println("sss " + cc);
+        System.err.println("sss " + cc + "  " + averageWeight + " queue size: " + topKEdges.size());
+
+        //sort weightLevels by value in DESC order
+//        weightLevels.entrySet().stream()
+//                .sorted(Map.Entry.<Double, Integer>comparingByValue().reversed())
+//                .forEachOrdered(x -> System.err.println(x.getKey() + " " + x.getValue()));
+
     }
 
     private void gatherComparisons(List<AbstractBlock> blocks) {
@@ -138,17 +151,18 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
     protected void getKThreshold(List<AbstractBlock> blocks) {
         long blockAssingments = 0;
-        long tbc = 0;
+        tbc = 0;
         //System.out.println("Blocks size: " + blocks.size());
         for (AbstractBlock block : blocks) {
             blockAssingments += block.getTotalBlockAssignments();
             tbc += block.getNoOfComparisons();
         }
         System.err.println("total comparison / ass: " + tbc + " / " + blockAssingments);
-        kThreshold = Math.max(Math.round(blockAssingments * (selectivity + 0.35)), Math.round(blockAssingments * 0.5));
+//        kThreshold = Math.max(Math.round(blockAssingments * (selectivity + 0.35)), Math.round(blockAssingments * 0.5));
+        kThreshold = Math.min(Math.round(tbc * (selectivity + 0.35)), Math.round(tbc * 0.5));
 //        kThreshold = Math.min(kThreshold, Math.round(blockAssingments * 0.8));
-        kThreshold = tbc;
-        System.err.println("threshold: " + kThreshold);
+        kThreshold = Math.round(blockAssingments);
+        System.err.println("threshold: " + kThreshold + " / tbc: " + tbc);
 
 //        kThreshold = Math.min(Math.round(blockAssingments *  (selectivity + 0.35)), Math.round(blockAssingments * 0.8));
 

@@ -17,6 +17,8 @@ public class QueryBlockIndex extends BlockIndex {
 
     protected Set<Integer> qIds;
 
+    private static List<String> queryTokens;
+
     public QueryBlockIndex() {
         this.qIds = new HashSet<>();
     }
@@ -42,8 +44,17 @@ public class QueryBlockIndex extends BlockIndex {
         List<AbstractBlock> blocks = new ArrayList<AbstractBlock>();
         for (Map.Entry<String, Set<Integer>> term : invertedIndex.entrySet()) {
             if (1 < term.getValue().size()) {
+                boolean isProtected = false;
+                if(queryTokens.contains(term.getKey().trim())){
+
+                    System.err.println("Protected terms: " + term.getKey());
+                    isProtected = true;
+                }
+
+
                 int[] idsArray = Converter.convertListToArray(term.getValue());
                 UnilateralBlock uBlock = new UnilateralBlock(idsArray, qIds);
+                uBlock.setProtected(isProtected);
                 blocks.add(uBlock);
             }
         }
@@ -72,6 +83,36 @@ public class QueryBlockIndex extends BlockIndex {
 
         }
     }
+
+
+    public void createBlockIndex(HashMap<Integer, Object[]> queryData, Integer key, List<String> tokens) {
+        List<String> queryTokens = new ArrayList<>();
+
+//        queryTokens.add("powershot");
+//        queryTokens.add("digital");
+        queryTokens.addAll(tokens);
+        this.queryTokens= queryTokens;
+        // Get project results from previous enumerator
+        for (Object[] row : queryData.values()) {
+            Object[] currentLine = (Object[]) row;
+            Integer fields = currentLine.length;
+            String entityKey = currentLine[key].toString();
+            if (entityKey.contentEquals("")) continue;
+            EntityProfile eP = new EntityProfile(currentLine[key].toString()); // 0 is id, must put this in schema catalog
+            qIds.add(Integer.valueOf(entityKey));
+            int index = 0;
+            while (index < fields) {
+                if (index != key) {
+                    eP.addAttribute(index, currentLine[index].toString());
+                    ;
+                }
+                index++;
+            }
+            this.entityProfiles.add(eP);
+
+        }
+    }
+
 
     public <T> void createBlockIndex(List<T> dataset, Integer key) {
         // Get project results from previous enumerator

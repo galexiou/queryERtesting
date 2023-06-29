@@ -1,8 +1,11 @@
 package org.imsi.queryEREngine.imsi.calcite.util;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.calcite.linq4j.AbstractEnumerable;
 import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.linq4j.Enumerator;
+import org.apache.commons.lang3.tuple.Pair;
 import org.imsi.queryEREngine.apache.calcite.util.Sources;
 import org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv.CsvEnumerator;
 import org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv.CsvFieldType;
@@ -141,6 +144,7 @@ public class DeduplicationExecution<T> {
         String blockSizes = getBlockSizes(blocks);
         String blockEntities = Integer.toString(queryBlockIndex.blocksToEntities(blocks).size());
 
+<<<<<<< HEAD
         //sort queryblockindex  by size of values   (block size)
 
 //        queryBlockIndex.sortIndex();
@@ -157,6 +161,8 @@ public class DeduplicationExecution<T> {
             // META BLOCKING
 
 
+=======
+>>>>>>> 2d6dd872fd68215bdd2a9605bdee80a7541deffa
         // PURGING
         double blockPurgingStartTime = System.currentTimeMillis();
 
@@ -217,6 +223,14 @@ public class DeduplicationExecution<T> {
             blockQids = queryBlockIndex.blocksToEntities(blocks);
         totalIds.addAll(blockQids);
         totalIds.addAll(qIds);
+
+        try {
+            storeBlocks(blocks, tableName);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
         DeduplicationExecution.qIds = qIds;
         // To find ground truth statistics
         DeduplicationExecution.blocks = blocks;
@@ -322,10 +336,47 @@ public class DeduplicationExecution<T> {
         return System.currentTimeMillis() - startTime;
     }
 
-    private static double storeBlocks(List<AbstractBlock> blocks, String tableName) {
+    private static double storeBlocks(List<AbstractBlock> blocks, String tableName) throws IOException {
         double startTime = System.currentTimeMillis();
         List<DecomposedBlock> dBlocks = (List<DecomposedBlock>) (List<? extends AbstractBlock>) blocks;
-        SerializationUtilities.storeSerializedObject(dBlocks, dumpDirectories.getBlockDirPath());
+        //SerializationUtilities.storeSerializedObject(dBlocks, dumpDirectories.getBlockDirPath());
+        Set<String> uComparisons = new HashSet<>();
+        File queryFile = new File("./data/candidates.csv");
+        FileWriter blocksWriter = new FileWriter("./data/blocks.txt");
+        blocksWriter.write("[");
+        FileWriter csvWriter = new FileWriter(queryFile);
+        csvWriter.append("e1,e2\n");
+        int i = 0;
+        for (AbstractBlock block : blocks){
+            i++;
+            int j = 0;
+            ComparisonIterator it = block.getComparisonIterator();
+            Set<Integer> uIds = new HashSet<>();
+            while(it.hasNext()){
+                j++;
+                String uniqueComp = "";
+                Comparison comp = it.next();
+                int id1 = comp.getEntityId1();
+                int id2 = comp.getEntityId2();
+                if (id1 > id2)
+					uniqueComp = id1 + "u" + id2;
+				else
+					uniqueComp = id2 + "u" + id1;
+				if (uComparisons.contains(uniqueComp))
+					continue;
+                uIds.add(id1);
+                uIds.add(id2);
+				uComparisons.add(uniqueComp);
+                csvWriter.append(tableName).append("_").append(String.valueOf(id1)).append(",")
+                        .append(tableName).append("_").append(String.valueOf(id2)).append("\n");
+            };
+            blocksWriter.append("[");
+            blocksWriter.append(uIds.stream().map(m -> "'" + tableName + "_" + m + "'").collect(Collectors.joining(",")));
+            blocksWriter.append("]");
+        }
+        csvWriter.flush();;
+        blocksWriter.append("]");
+        blocksWriter.flush();
         return System.currentTimeMillis() - startTime;
     }
 

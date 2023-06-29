@@ -85,11 +85,18 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         int ccounter = 0;
         int counterSelf = 0;
         //int limit = (int) Math.floor(10000 * selectivity);
+<<<<<<< HEAD
         int limit = (int) Math.floor(qIds.size() * selectivity) * 10;
 //        limit = Math.min(limit, 40000);
         limit = (int) kThreshold;
         limit = (int) tbc;
                 System.out.println("LIMIT: " + limit);
+=======
+//        int limit = (int) Math.floor(qIds.size() * selectivity);
+//        limit = Math.min(limit, 40000);
+        //System.out.println(limit);
+        long limit = tbc;
+>>>>>>> 2d6dd872fd68215bdd2a9605bdee80a7541deffa
         double mean = 0.0f;
         int counter = 0;
         int cc = 0;
@@ -151,12 +158,16 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
 
     protected void getKThreshold(List<AbstractBlock> blocks) {
         long blockAssingments = 0;
+<<<<<<< HEAD
         tbc = 0;
+=======
+>>>>>>> 2d6dd872fd68215bdd2a9605bdee80a7541deffa
         //System.out.println("Blocks size: " + blocks.size());
         for (AbstractBlock block : blocks) {
             blockAssingments += block.getTotalBlockAssignments();
             tbc += block.getNoOfComparisons();
         }
+<<<<<<< HEAD
         System.err.println("total comparison / ass: " + tbc + " / " + blockAssingments);
 //        kThreshold = Math.max(Math.round(blockAssingments * (selectivity + 0.35)), Math.round(blockAssingments * 0.5));
         kThreshold = Math.min(Math.round(tbc * (selectivity + 0.35)), Math.round(tbc * 0.5));
@@ -164,6 +175,11 @@ public class CardinalityEdgePruning extends AbstractMetablocking {
         kThreshold = Math.round(blockAssingments);
         System.err.println("threshold: " + kThreshold + " / tbc: " + tbc);
 
+=======
+//        kThreshold = Math.max(Math.round(blockAssingments *  (selectivity + 0.35)), Math.round(blockAssingments * 0.5));
+//        kThreshold = Math.min(kThreshold, Math.round(blockAssingments * 0.8));
+        kThreshold = Math.round(blockAssingments);
+>>>>>>> 2d6dd872fd68215bdd2a9605bdee80a7541deffa
 //        kThreshold = Math.min(Math.round(blockAssingments *  (selectivity + 0.35)), Math.round(blockAssingments * 0.8));
 
     }

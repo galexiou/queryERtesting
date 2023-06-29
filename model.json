@@ -2,12 +2,16 @@
   "version": "1.0",
   "defaultSchema": "oag",
   "schemas": [
-     {
-      "name": "oag",
+    {
+      "name": "real",
       "type": "custom",
       "factory": "org.imsi.queryEREngine.imsi.calcite.adapter.enumerable.csv.CsvSchemaFactory",
       "operand": {
+<<<<<<< HEAD
         "directory": "/Users/giorgos/Desktop/publications",
+=======
+        "directory": "/Users/vasilisstamatopoulos/Documents/Works/ATHENA/Projects/VF/queryER-data/dsd",
+>>>>>>> 2d6dd872fd68215bdd2a9605bdee80a7541deffa
         "flavor": "translatable"
       }
     }

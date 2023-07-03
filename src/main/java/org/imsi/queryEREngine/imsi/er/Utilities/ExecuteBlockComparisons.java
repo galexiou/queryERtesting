@@ -3,10 +3,8 @@ package org.imsi.queryEREngine.imsi.er.Utilities;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import it.unimi.dsi.fastutil.Hash;
 import org.imsi.queryEREngine.imsi.calcite.util.DeduplicationExecution;
@@ -24,6 +22,34 @@ import org.apache.arrow.flight.FlightClient;
 import org.apache.arrow.flight.Location;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
+
+import org.apache.arrow.flight.Action;
+import org.apache.arrow.flight.AsyncPutListener;
+import org.apache.arrow.flight.CallStatus;
+import org.apache.arrow.flight.Criteria;
+import org.apache.arrow.flight.FlightClient;
+import org.apache.arrow.flight.FlightDescriptor;
+import org.apache.arrow.flight.FlightEndpoint;
+import org.apache.arrow.flight.FlightInfo;
+import org.apache.arrow.flight.FlightServer;
+import org.apache.arrow.flight.FlightStream;
+import org.apache.arrow.flight.Location;
+import org.apache.arrow.flight.NoOpFlightProducer;
+import org.apache.arrow.flight.PutResult;
+import org.apache.arrow.flight.Result;
+import org.apache.arrow.flight.Ticket;
+import org.apache.arrow.memory.BufferAllocator;
+import org.apache.arrow.memory.RootAllocator;
+import org.apache.arrow.util.AutoCloseables;
+import org.apache.arrow.vector.VarCharVector;
+import org.apache.arrow.vector.VectorLoader;
+import org.apache.arrow.vector.VectorSchemaRoot;
+import org.apache.arrow.vector.VectorUnloader;
+import org.apache.arrow.vector.ipc.message.ArrowRecordBatch;
+import org.apache.arrow.vector.types.pojo.ArrowType;
+import org.apache.arrow.vector.types.pojo.Field;
+import org.apache.arrow.vector.types.pojo.FieldType;
+import org.apache.arrow.vector.types.pojo.Schema;
 
 public class ExecuteBlockComparisons<T> {
 
@@ -83,18 +109,6 @@ public class ExecuteBlockComparisons<T> {
 
         // Make arrow data handler that holds pairs and the newdata dictionary (hashmap)
         ArrowDataHandler arrowHandler = new ArrowDataHandler(newData);
-
-        BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
-        FlightProducer producer = new ArrowFlightProducer(arrowHandler, ALLOCATOR);
-        Location location = Location.forGrpcInsecure("0.0.0.0", 8080);
-        try (FlightClient flightClient = FlightClient.builder(ALLOCATOR, location).build()) {
-            System.out.println("C1: Client (Location): Connected to " + location.getUri());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
 
 
         for (AbstractBlock block : blocks) {
@@ -157,10 +171,19 @@ public class ExecuteBlockComparisons<T> {
 
         arrowHandler.addDictData();
 
-//		try{ connector.start(); }
-//		catch (Exception e){ System.out.println("Error in initializing server");}
 
-        arrowHandler.debug();
+        try{
+            ArrowFlightConnector connector = new ArrowFlightConnector(8080);
+            connector.putData(arrowHandler.fetchPairs(), "pairs");
+            connector.putData(arrowHandler.fetchDict(),  "dict");
+            VectorSchemaRoot results = connector.getData("pairs");
+            System.out.println(results.getVector("id1"));
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+
 
         try {
             randomAccessReader.close();

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import it.unimi.dsi.fastutil.Hash;
 import org.imsi.queryEREngine.imsi.calcite.util.DeduplicationExecution;
@@ -176,6 +177,11 @@ public class ExecuteBlockComparisons<T> {
             ArrowFlightConnector connector = new ArrowFlightConnector(8080);
             connector.putData(arrowHandler.fetchPairs(), "pairs");
             connector.putData(arrowHandler.fetchDict(),  "dict");
+            connector.doAction("bert_inference", "null");
+            while(!connector.isPredictionReady()){
+                System.out.println("Timed out - Retrying...");
+                TimeUnit.SECONDS.sleep(1);
+            }
             VectorSchemaRoot results = connector.getData("pairs");
             System.out.println(results.getVector("id1"));
         }

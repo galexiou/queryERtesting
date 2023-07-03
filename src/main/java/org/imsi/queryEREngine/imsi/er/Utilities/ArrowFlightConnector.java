@@ -6,11 +6,14 @@ import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.VectorSchemaRoot;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 public class ArrowFlightConnector {
     private static final BufferAllocator ALLOCATOR = new RootAllocator(Long.MAX_VALUE);
     private static FlightClient client;
     private final Location location;
+    private static final int FLIGHT_TIMEOUT = 2;
 
 
     public ArrowFlightConnector(int port) {
@@ -42,6 +45,29 @@ public class ArrowFlightConnector {
 //            System.out.println(flightStream.getSchema());
         }
         return vectorSchemaRootReceived;
+
+    }
+
+    public boolean isPredictionReady(){
+        Iterator<Result> actionResult = client.doAction(new Action("is_ready",
+                FlightDescriptor.path("null").getPath().get(0).getBytes(StandardCharsets.UTF_8)),
+                CallOptions.timeout(FLIGHT_TIMEOUT, TimeUnit.SECONDS));
+        if (actionResult.hasNext()) {
+            Result result = actionResult.next();
+            String result_body = new String(result.getBody(), StandardCharsets.UTF_8);
+            return result_body.equals("yes");
+        }
+        return false;
+
+    }
+
+    public void doAction(String actionType, String descriptor){
+        Iterator<Result> actionResult = client.doAction(new Action(actionType,
+                FlightDescriptor.path(descriptor).getPath().get(0).getBytes(StandardCharsets.UTF_8)));
+        while (actionResult.hasNext()) {
+            Result result = actionResult.next();
+            System.out.println(new String(result.getBody(), StandardCharsets.UTF_8));
+        }
 
     }
 }

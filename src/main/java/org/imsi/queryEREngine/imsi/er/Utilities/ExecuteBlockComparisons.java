@@ -168,9 +168,11 @@ public class ExecuteBlockComparisons<T> {
             }
         }
 
+        /* Generate the dictionary arrow table using data provided at construction */
         arrowHandler.addDictData();
 
 
+        /* Initiate a connection, request a bert inference, wait for results, store them in unionFind */
         try{
             ArrowFlightConnector connector = new ArrowFlightConnector(8080);
             connector.putData(arrowHandler.fetchPairs(), "pairs");

@@ -17,12 +17,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles the transmutation of data into the arrow form so they can later be either
+ * stored or transferred using Arrow Flight
+ */
 public class ArrowDataHandler {
     private final BufferAllocator allocator;
     private final VectorSchemaRoot pairVSR;
     private final VectorSchemaRoot dictVSR;
     private final HashMap<Integer, Object[]> data;
     private final int columnCount;
+
+    /**
+     * Constructs an ArrowDataHandler and stores the data passed to be used by addDictData.
+     * Responsible for transmuting data into arrow format
+     * @param data dictionary of IDs -> array of strings/features
+     */
     public ArrowDataHandler(HashMap<Integer, Object[]> data){
         // Create a new RootAllocator
         this.allocator = new RootAllocator();
@@ -32,6 +42,11 @@ public class ArrowDataHandler {
         this.dictVSR = this.createDictVSR(this.columnCount);
     }
 
+    /**
+     * Adds the pair of ids provided to the pairs table
+     * @param id1 id of the first element
+     * @param id2 id of the second element
+     */
     public void addPair(int id1, int id2){
         IntVector idVector1 = (IntVector) this.pairVSR.getVector("id1");
         IntVector idVector2 = (IntVector) this.pairVSR.getVector("id2");
@@ -44,6 +59,9 @@ public class ArrowDataHandler {
         incrementPairRowCount();
     }
 
+    /**
+     * Adds the data provided in the constructor to the dictionary table
+     */
     public void addDictData(){
         VectorSchemaRoot root = this.dictVSR;
         IntVector idVector = (IntVector) root.getVector("id");
@@ -66,8 +84,13 @@ public class ArrowDataHandler {
         });
     }
 
+    /**
+     * @return Table of possible pairs
+     */
     public VectorSchemaRoot fetchPairs(){ return this.pairVSR; }
-
+    /**
+     * @return Dictionary of IDs -> Strings of features
+     */
     public VectorSchemaRoot fetchDict() { return this.dictVSR; }
 
     private int getPairRowCount(){return this.pairVSR.getRowCount();}

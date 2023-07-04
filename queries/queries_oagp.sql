@@ -1,6 +1,7 @@
 
 -- 5, 10, 15, 20, 25, 30, 35, 40, 45, 50
 
+SELECT DEDUP * FROM oag.publications WHERE MOD(id, 10000) < 1
 SELECT DEDUP * FROM oag.publications WHERE MOD(id, 40) < 1
 SELECT DEDUP * FROM oag.publications WHERE MOD(id, 20) < 1
 -- SELECT DEDUP * FROM oag.people500k WHERE MOD(index, 10) < 1

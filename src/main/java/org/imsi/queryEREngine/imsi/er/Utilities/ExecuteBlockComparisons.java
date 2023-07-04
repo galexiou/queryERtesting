@@ -6,8 +6,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import it.unimi.dsi.fastutil.Hash;
+import org.apache.arrow.vector.*;
 import org.imsi.queryEREngine.imsi.calcite.util.DeduplicationExecution;
 import org.imsi.queryEREngine.imsi.er.DataStructures.AbstractBlock;
 import org.imsi.queryEREngine.imsi.er.DataStructures.Comparison;
@@ -42,10 +44,6 @@ import org.apache.arrow.flight.Ticket;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.util.AutoCloseables;
-import org.apache.arrow.vector.VarCharVector;
-import org.apache.arrow.vector.VectorLoader;
-import org.apache.arrow.vector.VectorSchemaRoot;
-import org.apache.arrow.vector.VectorUnloader;
 import org.apache.arrow.vector.ipc.message.ArrowRecordBatch;
 import org.apache.arrow.vector.types.pojo.ArrowType;
 import org.apache.arrow.vector.types.pojo.Field;
@@ -152,21 +150,21 @@ public class ExecuteBlockComparisons<T> {
 //                ufind size: 3397
 
 
-                double compStartTime = System.currentTimeMillis();
-                double similarity = ProfileComparison.getJaccardSimilarity(entity1, entity2, keyIndex);
-                double compEndTime = System.currentTimeMillis();
-                compTime += compEndTime - compStartTime;
-                comparisons++;
-                if (similarity >= 0.92) {
-                    //matches.add(uniqueComp);
-                    uFind.union(id1, id2);
-                    //for id1
-                    HashMap<Integer, Double> similarityValues = similarities.computeIfAbsent(id1, x -> new HashMap<>());
-                    similarityValues.put(id2, similarity);
-                    // for id2
-                    similarityValues = similarities.computeIfAbsent(id2, x -> new HashMap<>());
-                    similarityValues.put(id1, similarity);
-                }
+//                double compStartTime = System.currentTimeMillis();
+//                double similarity = ProfileComparison.getJaccardSimilarity(entity1, entity2, keyIndex);
+//                double compEndTime = System.currentTimeMillis();
+//                compTime += compEndTime - compStartTime;
+//                comparisons++;
+//                if (similarity >= 0.92) {
+//                    //matches.add(uniqueComp);
+//                    uFind.union(id1, id2);
+//                    //for id1
+//                    HashMap<Integer, Double> similarityValues = similarities.computeIfAbsent(id1, x -> new HashMap<>());
+//                    similarityValues.put(id2, similarity);
+//                    // for id2
+//                    similarityValues = similarities.computeIfAbsent(id2, x -> new HashMap<>());
+//                    similarityValues.put(id1, similarity);
+//                }
             }
         }
 
@@ -182,8 +180,14 @@ public class ExecuteBlockComparisons<T> {
                 System.out.println("Timed out - Retrying...");
                 TimeUnit.SECONDS.sleep(1);
             }
-            VectorSchemaRoot results = connector.getData("pairs");
-            System.out.println(results.getVector("id1"));
+            VectorSchemaRoot results = connector.getData("results");
+            UInt4Vector id1s = (UInt4Vector) results.getVector("id1");
+            UInt4Vector id2s = (UInt4Vector) results.getVector("id2");
+            System.out.println(id1s.getValueCount());
+
+            for(int i = 0; i < id1s.getValueCount(); i++){
+                uFind.union(id1s.get(i), id2s.get(i));
+            }
         }
         catch(Exception e){
             e.printStackTrace();

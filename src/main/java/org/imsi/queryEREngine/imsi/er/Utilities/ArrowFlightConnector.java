@@ -60,7 +60,6 @@ public class ArrowFlightConnector {
         return false;
 
     }
-
     public void doAction(String actionType, String descriptor){
         Iterator<Result> actionResult = client.doAction(new Action(actionType,
                 FlightDescriptor.path(descriptor).getPath().get(0).getBytes(StandardCharsets.UTF_8)));
